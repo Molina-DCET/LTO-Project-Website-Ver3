@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         /* =============================================
-           Window B — scoped styles
+           Window B ï¿½ scoped styles
            ============================================= */
         .hero.wb-hero {
             justify-content: flex-start;
@@ -475,7 +475,7 @@
         }
 
         /* =============================================
-           RIGHT SIDEBAR — list section
+           RIGHT SIDEBAR ï¿½ list section
            ============================================= */
         .wb-list-section {
             grid-column: 2;
@@ -746,7 +746,7 @@
         }
 
         /* =============================================
-           MODAL — frosted-glass overlay
+           MODAL ï¿½ frosted-glass overlay
            ============================================= */
         .wb-overlay {
             position: fixed;
@@ -1013,7 +1013,7 @@
 
     <nav class="sub-nav" aria-label="Section navigation">
         <a href="windowList.html" class="sub-nav-item">Windows</a>
-        <span class="sub-nav-separator" aria-hidden="true">›</span>
+        <span class="sub-nav-separator" aria-hidden="true">ï¿½</span>
         <span class="sub-nav-item active" aria-current="page">Window H</span>
     </nav>
 
@@ -1244,6 +1244,24 @@
         var LS_HOLD = 'lto_onhold_queue';
         var LS_ACC = 'lto_accomplished_queue';
         var LS_CALLING = 'lto_' + WINDOW_ID + '_active_calling';
+
+        function _addHistory(ticket, desc, action) {
+            if (!ticket) return;
+            if (!ticket.history) ticket.history = [];
+            var now = new Date();
+            var ts = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            ticket.history.push({
+                time: ts,
+                action: action || 'INFO',
+                window: _winLabel(),
+                desc: desc
+            });
+        }
+
+        function _winLabel() {
+            return WINDOW_ID.replace(/^window/i, 'Window ').replace('cashier', 'Cashier');
+        }
+
 
         function getNextSection(purpose, currentSec) {
             var p = (purpose || '').toLowerCase();
@@ -1498,6 +1516,8 @@
             if (nextSec === 'Complete') {
                 ticket.status = 'accomplished';
                 ticket.accomplishedAt = Date.now();
+                ticket.currentWindow = _winLabel() + ' (Completed)';
+                _addHistory(ticket, 'Completed/accomplished at ' + _winLabel(), 'COMPLETED');
                 var acc = getAccList();
                 acc.push(ticket);
                 saveAccList(acc);
@@ -1505,6 +1525,8 @@
                 ticket.currentSection = nextSec;
                 ticket.status = 'pending';
                 ticket.nextToBeCalled = false;
+                ticket.currentWindow = 'Queue for ' + nextSec;
+                _addHistory(ticket, 'Advanced from ' + _winLabel() + ' to ' + nextSec, 'ADVANCED');
                 var raw = JSON.parse(localStorage.getItem(LS_QUEUE) || '[]');
                 raw = raw.filter(function (item) { return item.id !== ticket.id; });
                 raw.push(ticket);
@@ -1728,6 +1750,9 @@
             localStorage.setItem(LS_QUEUE, JSON.stringify(raw));
 
             currentCalling = next;
+            next.currentWindow = _winLabel();
+            next.status = 'calling';
+            _addHistory(next, 'Called at ' + _winLabel(), 'CALLED');
             var nowTime = Date.now();
             saveActiveCalling(next, nowTime);
             refreshCallingUI();
@@ -1740,6 +1765,7 @@
         function callAgain() {
             if (!currentCalling) return;
             var nowTime = Date.now();
+            _addHistory(currentCalling, 'Re-called at ' + _winLabel(), 'RECALLED');
             saveActiveCalling(currentCalling, nowTime);
             startTimer(nowTime);
             showToast('Calling again: ' + currentCalling.id, 'login');
@@ -1749,6 +1775,8 @@
             if (!currentCalling) return;
             var ticket = currentCalling;
             ticket.status = 'pending';
+            ticket.currentWindow = 'Queue for ' + WINDOW_SECTION;
+            _addHistory(ticket, 'Call cancelled at ' + _winLabel() + ', returned to queue', 'CANCEL_CALL');
 
             var raw = JSON.parse(localStorage.getItem(LS_QUEUE) || '[]');
             raw.unshift(ticket);
@@ -1766,6 +1794,9 @@
             if (!currentCalling) return;
             var h = JSON.parse(localStorage.getItem(LS_HOLD) || '[]');
             currentCalling.status = 'onhold';
+            currentCalling.heldByWindow = _winLabel();
+            currentCalling.currentWindow = 'On Hold at ' + _winLabel();
+            _addHistory(currentCalling, 'Put on hold at ' + _winLabel(), 'ON_HOLD');
             h.push(currentCalling);
             localStorage.setItem(LS_HOLD, JSON.stringify(h));
             saveActiveCalling(null);
@@ -1844,6 +1875,7 @@
             var found = raw.find(function (item) { return item.id === t.id; });
             if (found) {
                 found.nextToBeCalled = true;
+                _addHistory(found, 'Designated as Next to be Called at ' + _winLabel(), 'PRIORITIZED');
             }
             saveQueue(raw);
             listPage = 0;
@@ -1864,6 +1896,7 @@
             if (idxInRaw !== -1) {
                 var item = raw.splice(idxInRaw, 1)[0];
                 item.nextToBeCalled = false;
+                _addHistory(item, 'Moved to top of queue at ' + _winLabel(), 'PRIORITIZED');
                 var isPrio = (item.type && item.type.toLowerCase() === 'priority') || (item.id && item.id.startsWith('P-'));
                 if (isPrio) {
                     raw.unshift(item);
@@ -1893,6 +1926,9 @@
             saveQueue(q);
             var h = JSON.parse(localStorage.getItem(LS_HOLD) || '[]');
             t.status = 'onhold';
+            t.heldByWindow = _winLabel();
+            t.currentWindow = 'On Hold at ' + _winLabel();
+            _addHistory(t, 'Put on hold at ' + _winLabel(), 'ON_HOLD');
             h.push(t);
             localStorage.setItem(LS_HOLD, JSON.stringify(h));
             showToast(t.id + ' moved to on hold.', 'logout');
@@ -1909,6 +1945,8 @@
             localStorage.setItem(LS_HOLD, JSON.stringify(rawH));
             var q = JSON.parse(localStorage.getItem(LS_QUEUE) || '[]');
             t.status = 'pending';
+            t.currentWindow = 'Queue for ' + WINDOW_SECTION;
+            _addHistory(t, 'Restored from hold at ' + _winLabel() + ' to pending queue', 'RESTORED');
             q.push(t);
             localStorage.setItem(LS_QUEUE, JSON.stringify(q));
             showToast(t.id + ' moved back to pending.', 'login');
@@ -1917,7 +1955,7 @@
         }
 
         /* ===================================================================
-           STATISTICS — real data from localStorage
+           STATISTICS ï¿½ real data from localStorage
         =================================================================== */
         var statsSlide = 0;
 
@@ -2026,7 +2064,7 @@
         });
 
         /* ===================================================================
-           LIVE REFRESH — poll localStorage every 3 seconds to catch new
+           LIVE REFRESH ï¿½ poll localStorage every 3 seconds to catch new
            tickets printed from Window A in another tab
         =================================================================== */
         setInterval(function () {
