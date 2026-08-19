@@ -1,4 +1,4 @@
-ï»¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         /* =============================================
-           Window B â€” scoped styles
+           Window B — scoped styles
            ============================================= */
         .hero.wb-hero {
             justify-content: flex-start;
@@ -475,7 +475,7 @@
         }
 
         /* =============================================
-           RIGHT SIDEBAR â€” list section
+           RIGHT SIDEBAR — list section
            ============================================= */
         .wb-list-section {
             grid-column: 2;
@@ -746,7 +746,7 @@
         }
 
         /* =============================================
-           MODAL â€” frosted-glass overlay
+           MODAL — frosted-glass overlay
            ============================================= */
         .wb-overlay {
             position: fixed;
@@ -1013,7 +1013,7 @@
 
     <nav class="sub-nav" aria-label="Section navigation">
         <a href="windowList.html" class="sub-nav-item">Windows</a>
-        <span class="sub-nav-separator" aria-hidden="true">â€º</span>
+        <span class="sub-nav-separator" aria-hidden="true">›</span>
         <span class="sub-nav-item active" aria-current="page">Window I</span>
     </nav>
 
@@ -1695,6 +1695,10 @@
         }
 
         function callNext() {
+            if (localStorage.getItem('lto_system_paused') === 'true') {
+                showToast('SYSTEM PAUSED by Control Panel.', 'logout');
+                return;
+            }
             var q = getQueue();
             if (q.length === 0 && !currentCalling) { showToast('No pending tickets in queue.', 'logout'); return; }
 
@@ -1913,7 +1917,7 @@
         }
 
         /* ===================================================================
-           STATISTICS â€” real data from localStorage
+           STATISTICS — real data from localStorage
         =================================================================== */
         var statsSlide = 0;
 
@@ -2022,7 +2026,7 @@
         });
 
         /* ===================================================================
-           LIVE REFRESH â€” poll localStorage every 3 seconds to catch new
+           LIVE REFRESH — poll localStorage every 3 seconds to catch new
            tickets printed from Window A in another tab
         =================================================================== */
         setInterval(function () {

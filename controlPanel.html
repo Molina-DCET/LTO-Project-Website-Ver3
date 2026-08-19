@@ -9,13 +9,134 @@
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           Control Panel — Window B-consistent scoped chart styles
+           ============================================= */
+        .cp-chart-svg {
+            width: 100%;
+            height: 128px;
+            padding-right: 40px;
+            overflow: visible;
+        }
+
+        .cpc-grid {
+            stroke: rgba(0, 0, 0, 0.08);
+            stroke-width: 1;
+        }
+
+        .cpc-lbl {
+            fill: #333333;
+            font-size: 9px;
+            font-family: var(--font-family);
+            font-weight: 600;
+            transform: translateY(5px);
+        }
+
+        .cpc-line-e {
+            fill: none;
+            stroke: #e60028;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .cpc-line-a {
+            fill: none;
+            stroke: #0052ff;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .cpc-dot-e {
+            fill: #e60028;
+            stroke: #fff;
+            stroke-width: 1.5;
+            filter: drop-shadow(0 0 3px rgba(230, 0, 40, .6));
+        }
+
+        .cpc-dot-a {
+            fill: #0052ff;
+            stroke: #fff;
+            stroke-width: 1.5;
+            filter: drop-shadow(0 0 3px rgba(0, 82, 255, .6));
+        }
+
+        .cpc-area-e {
+            fill: url(#cpGradE);
+            opacity: .18;
+        }
+
+        .cpc-area-a {
+            fill: url(#cpGradA);
+            opacity: .18;
+        }
+
+        /* Chart Slide Toggle (matching Window B) */
+        .cp-chart-slides {
+            position: relative;
+            min-height: 138px;
+        }
+
+        .cp-chart-slide {
+            display: none;
+        }
+
+        .cp-chart-slide.active {
+            display: block;
+        }
+
+        /* No-data empty state */
+        .cp-no-data {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 128px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #999;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* Window selector dropdown */
+        .cp-window-select {
+            padding: 8px 14px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 12px;
+            background: rgba(0, 20, 100, 0.45);
+            color: #ffffff;
+            font-family: var(--font-family);
+            font-size: 0.9rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            outline: none;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+            appearance: auto;
+        }
+
+        .cp-window-select:hover,
+        .cp-window-select:focus {
+            background: rgba(0, 20, 100, 0.65);
+            border-color: #FFD700;
+        }
+
+        .cp-window-select option {
+            background: #002ea1;
+            color: #ffffff;
+            font-weight: 900;
+        }
+    </style>
     <script>
         // Page transition: fade-exit on any internal link click
         document.addEventListener('click', function(e) {
-            const link = e.target.closest('a[href]');
+            var link = e.target.closest('a[href]');
             if (link && !link.href.startsWith('#') && link.target !== '_blank' && !link.href.startsWith('javascript')) {
                 e.preventDefault();
-                const dest = link.href;
+                var dest = link.href;
                 document.body.classList.add('page-exit');
                 setTimeout(function() { window.location.href = dest; }, 250);
             }
@@ -39,8 +160,8 @@
 
         <div class="header-right">
             <div class="time-container">
-                <span class="date-text" id="date-display">August 02, 2026</span>
-                <span class="time-text" id="time-display">14:34:33</span>
+                <span class="date-text" id="date-display">Loading...</span>
+                <span class="time-text" id="time-display">--:--:--</span>
             </div>
             <a href="windowList.html" class="admin-btn">WINDOW LIST</a>
             <a href="login.html" class="logout-btn-header" id="header-logout-btn" style="background: linear-gradient(180deg, #ff1a1a 0%, #b30000 100%); padding: 8px 24px; border-radius: 20px; color: #fff; font-weight: 900; text-decoration: none; font-size: 0.95rem; border: 1.5px solid rgba(255,255,255,0.4); text-transform: uppercase;">LOGOUT</a>
@@ -65,10 +186,26 @@
         <img src="img/logo.png" alt="LTO Logo Watermark" class="hero-watermark">
 
         <div class="cp-container">
-            <!-- Header Row: Title & Subtitle -->
+            <!-- Header Row: Title & Window Selector & Subtitle -->
             <div class="cp-header-row">
                 <h1 class="cp-main-title">CONTROL PANEL</h1>
-                <div class="cp-sub-title">OVERALL | STATISTICS</div>
+                <div style="display:flex; align-items:center; gap:14px;">
+                    <select id="cp-window-select" class="cp-window-select" aria-label="Select window for statistics">
+                        <option value="Overall" selected>Overall</option>
+                        <option value="windowB">B</option>
+                        <option value="windowC">C</option>
+                        <option value="windowE">E</option>
+                        <option value="windowF">F</option>
+                        <option value="windowG">G</option>
+                        <option value="windowH">H</option>
+                        <option value="windowI">I</option>
+                        <option value="windowJ">J</option>
+                        <option value="cashier">Cashier</option>
+                        <option value="windowM">M</option>
+                        <option value="windowN">L</option>
+                    </select>
+                    <div class="cp-sub-title" id="cp-sub-title">OVERALL | STATISTICS</div>
+                </div>
             </div>
 
             <!-- Top Section: Status Metrics Stack + Interactive Graph Card -->
@@ -76,37 +213,81 @@
                 <!-- Status Information Metrics Stack -->
                 <div class="cp-metrics-stack">
                     <div class="cp-metric-item">
-                        <span class="cp-metric-num" id="metric-entries">357</span>
+                        <span class="cp-metric-num" id="metric-entries">0</span>
                         <span class="cp-metric-label">ENTRIES</span>
                     </div>
                     <div class="cp-metric-item">
-                        <span class="cp-metric-num" id="metric-waiting">200</span>
+                        <span class="cp-metric-num" id="metric-waiting">0</span>
                         <span class="cp-metric-label">WAITING</span>
                     </div>
                     <div class="cp-metric-item">
-                        <span class="cp-metric-num" id="metric-done">10</span>
+                        <span class="cp-metric-num" id="metric-done">0</span>
                         <span class="cp-metric-label">DONE</span>
                     </div>
                     <div class="cp-metric-item">
-                        <span class="cp-metric-num" id="metric-onhold">2</span>
+                        <span class="cp-metric-num" id="metric-onhold">0</span>
                         <span class="cp-metric-label">ONHOLD</span>
                     </div>
                 </div>
 
-                <!-- Interactive Graph Card -->
+                <!-- Interactive SVG Graph Card (Window B Style) -->
                 <div class="cp-graph-card">
                     <div class="cp-graph-header">
-                        <span class="cp-graph-title">STATISTICS | <span id="graph-view-title">Entries</span></span>
-                        <button type="button" class="cp-graph-toggle-btn" id="graph-toggle-btn" title="Switch Graph View" aria-label="Switch Graph View">→</button>
+                        <span class="cp-graph-title" id="cp-graph-title">STATISTICS | Entries</span>
+                        <button type="button" class="cp-graph-toggle-btn" id="graph-toggle-btn"
+                            title="Switch Graph View" aria-label="Switch Graph View">→</button>
                     </div>
 
-                    <div class="cp-graph-canvas-container">
-                        <canvas id="cp-graph-canvas" class="cp-graph-canvas"></canvas>
+                    <!-- Chart Slides (Entries / On Hold) -->
+                    <div class="cp-chart-slides">
+                        <!-- Entries Chart -->
+                        <div class="cp-chart-slide active" id="cp-slide-0">
+                            <svg class="cp-chart-svg" viewBox="0 0 500 128" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="cpGradE" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#e60028" stop-opacity=".6" />
+                                        <stop offset="100%" stop-color="#e60028" stop-opacity="0" />
+                                    </linearGradient>
+                                </defs>
+                                <line x1="35" y1="8" x2="494" y2="8" class="cpc-grid" />
+                                <line x1="35" y1="36" x2="494" y2="36" class="cpc-grid" />
+                                <line x1="35" y1="64" x2="494" y2="64" class="cpc-grid" />
+                                <line x1="35" y1="92" x2="494" y2="92" class="cpc-grid" />
+                                <line x1="35" y1="118" x2="494" y2="118" class="cpc-grid" />
+                                <path id="cp-e-area" class="cpc-area-e" d="" />
+                                <polyline id="cp-e-line" class="cpc-line-e" points="" />
+                                <g id="cp-e-dots"></g>
+                                <g id="cp-e-xlbl"></g>
+                            </svg>
+                            <div class="cp-no-data" id="cp-nodata-entries" style="display:none;">No entry data available</div>
+                        </div>
+                        <!-- On Hold Chart -->
+                        <div class="cp-chart-slide" id="cp-slide-1">
+                            <svg class="cp-chart-svg" viewBox="0 0 500 128" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="cpGradA" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#0052ff" stop-opacity=".6" />
+                                        <stop offset="100%" stop-color="#0052ff" stop-opacity="0" />
+                                    </linearGradient>
+                                </defs>
+                                <line x1="35" y1="8" x2="494" y2="8" class="cpc-grid" />
+                                <line x1="35" y1="36" x2="494" y2="36" class="cpc-grid" />
+                                <line x1="35" y1="64" x2="494" y2="64" class="cpc-grid" />
+                                <line x1="35" y1="92" x2="494" y2="92" class="cpc-grid" />
+                                <line x1="35" y1="118" x2="494" y2="118" class="cpc-grid" />
+                                <path id="cp-a-area" class="cpc-area-a" d="" />
+                                <polyline id="cp-a-line" class="cpc-line-a" points="" />
+                                <g id="cp-a-dots"></g>
+                                <g id="cp-a-xlbl"></g>
+                            </svg>
+                            <div class="cp-no-data" id="cp-nodata-onhold" style="display:none;">No on-hold data available</div>
+                        </div>
                     </div>
 
+                    <!-- Dot Indicators -->
                     <div class="cp-graph-dots">
-                        <span class="cp-dot dot-entries active" id="dot-entries" title="Show Entries Graph"></span>
-                        <span class="cp-dot dot-onhold" id="dot-onhold" title="Show On Hold Graph"></span>
+                        <span class="cp-dot dot-entries active" id="cp-sdot-0" title="Show Entries Graph"></span>
+                        <span class="cp-dot dot-onhold" id="cp-sdot-1" title="Show On Hold Graph"></span>
                     </div>
                 </div>
             </div>
@@ -130,39 +311,39 @@
                             <div class="cp-info-title">TRANSACTION INFO</div>
                             <div class="cp-info-row">
                                 <span class="cp-info-lbl">NAME:</span>
-                                <span class="cp-info-val" id="det-name">Juan Dela Cruz</span>
+                                <span class="cp-info-val" id="det-name">—</span>
                             </div>
                             <div class="cp-info-row">
                                 <span class="cp-info-lbl">DATE:</span>
-                                <span class="cp-info-val" id="det-date">08/02/2026</span>
+                                <span class="cp-info-val" id="det-date">—</span>
                             </div>
                             <div class="cp-info-row">
                                 <span class="cp-info-lbl">TIME:</span>
-                                <span class="cp-info-val" id="det-time">14:34</span>
+                                <span class="cp-info-val" id="det-time">—</span>
                             </div>
                             <div class="cp-info-row">
                                 <span class="cp-info-lbl">TYPE:</span>
-                                <span class="cp-info-val" id="det-type">Regular</span>
+                                <span class="cp-info-val" id="det-type">—</span>
                             </div>
                             <div class="cp-info-row">
                                 <span class="cp-info-lbl">PURPOSE:</span>
-                                <span class="cp-info-val" id="det-purpose">Renewal</span>
+                                <span class="cp-info-val" id="det-purpose">—</span>
                             </div>
                             <div class="cp-info-row">
                                 <span class="cp-info-lbl">COMMENT:</span>
-                                <span class="cp-info-val" id="det-comment">None</span>
+                                <span class="cp-info-val" id="det-comment">—</span>
                             </div>
                             <div class="cp-info-row">
                                 <span class="cp-info-lbl">STATUS:</span>
-                                <span class="cp-info-val" id="det-status" style="color: #0052FF;">PENDING</span>
+                                <span class="cp-info-val" id="det-status">—</span>
                             </div>
                         </div>
 
                         <!-- Ticket Number Display Pane -->
                         <div class="cp-ticket-display">
                             <div class="cp-td-label">TICKET NUMBER</div>
-                            <div class="cp-td-number" id="det-ticket-num">R-001</div>
-                            <div class="cp-td-file" id="det-file-num">File No. R00108022026</div>
+                            <div class="cp-td-number" id="det-ticket-num">---</div>
+                            <div class="cp-td-file" id="det-file-num">File No. —</div>
                         </div>
                     </div>
 
@@ -171,23 +352,24 @@
                         <div class="cp-history-title">ACTION HISTORY</div>
                         <div class="cp-history-list" id="det-history-list">
                             <div class="cp-history-item">
-                                <span class="cp-history-time">14:34:02</span>
-                                <span class="cp-history-desc">Created ticket R-001 (Renewal)</span>
+                                <span class="cp-history-desc">No ticket selected</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Action Buttons Row -->
                     <div class="cp-action-row">
-                        <button type="button" class="cp-act-btn cp-btn-complete" id="btn-act-complete">COMPLETE</button>
-                        <button type="button" class="cp-act-btn cp-btn-transfer" id="btn-act-transfer">TRANSFER</button>
-                        <button type="button" class="cp-act-btn cp-btn-delete" id="btn-act-delete">DELETE</button>
+                        <button type="button" class="cp-act-btn cp-btn-complete" id="btn-act-complete" disabled>COMPLETE</button>
+                        <button type="button" class="cp-act-btn cp-btn-transfer" id="btn-act-transfer" disabled>TRANSFER</button>
+                        <button type="button" class="cp-act-btn cp-btn-delete" id="btn-act-delete" disabled>DELETE</button>
                     </div>
                 </div>
 
                 <!-- Right List & Search Card -->
                 <div class="cp-list-card">
-                    <input type="text" id="cp-search-input" class="cp-search-input" placeholder="FILE NUMBER/ TICKET NUMBER" aria-label="Search by File Number or Ticket Number">
+                    <input type="text" id="cp-search-input" class="cp-search-input"
+                        placeholder="FILE NUMBER/ TICKET NUMBER"
+                        aria-label="Search by File Number or Ticket Number">
                     <div class="cp-tickets-scroll" id="cp-tickets-list">
                         <!-- Rendered ticket items populate here -->
                     </div>
@@ -210,485 +392,578 @@
         </div>
     </div>
 
+    <!-- Toast Container -->
+    <div id="toast-container" style="position:fixed;bottom:20px;right:20px;z-index:99999;display:flex;flex-direction:column-reverse;gap:10px;"></div>
+
     <!-- Scripts for Logic & Control Panel Operations -->
     <script>
         /* ===================================================================
-           1. CLOCK & PST TIME DISPLAY
+           1. CLOCK (PST UTC+8 / Asia/Manila)
            =================================================================== */
         function updateClock() {
             try {
-                const now = new Date();
-                const dateOptions = { timeZone: 'Asia/Manila', month: 'long', day: '2-digit', year: 'numeric' };
-                const dateStr = now.toLocaleDateString('en-US', dateOptions);
-
-                const timeOptions = { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-                let timeStr = now.toLocaleTimeString('en-US', timeOptions).replace(/\s*[a-zA-Z]+/g, '');
-
+                var now = new Date();
+                var dateStr = now.toLocaleDateString('en-US', { timeZone: 'Asia/Manila', month: 'long', day: '2-digit', year: 'numeric' });
+                var timeStr = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).replace(/\s*[a-zA-Z]+/g, '');
                 document.getElementById('date-display').textContent = dateStr;
                 document.getElementById('time-display').textContent = timeStr;
-            } catch (e) {
-                console.error("Error updating Philippine Time:", e);
-            }
+            } catch (e) { console.error("Clock error:", e); }
         }
         updateClock();
         setInterval(updateClock, 1000);
 
         /* ===================================================================
-           2. DATA STORAGE ENGINE & SEED DATA INITIALIZATION
+           2. DATA STORAGE LAYER (mirrors all window pages)
            =================================================================== */
-        const LS_QUEUE = 'lto_ticket_queue';
-        const LS_HOLD = 'lto_onhold_queue';
-        const LS_ACC = 'lto_accomplished_queue';
-        const LS_PAUSED = 'lto_system_paused';
+        var LS_QUEUE = 'lto_ticket_queue';
+        var LS_HOLD = 'lto_onhold_queue';
+        var LS_ACC = 'lto_accomplished_queue';
+        var LS_PAUSED = 'lto_system_paused';
 
-        function getQueue() { return JSON.parse(localStorage.getItem(LS_QUEUE) || '[]'); }
-        function saveQueue(q) { localStorage.setItem(LS_QUEUE, JSON.stringify(q)); }
+        function getRawQueue() { return JSON.parse(localStorage.getItem(LS_QUEUE) || '[]'); }
+        function getRawHold() { return JSON.parse(localStorage.getItem(LS_HOLD) || '[]'); }
+        function getRawAcc() { return JSON.parse(localStorage.getItem(LS_ACC) || '[]'); }
 
-        function getHold() { return JSON.parse(localStorage.getItem(LS_HOLD) || '[]'); }
-        function saveHold(h) { localStorage.setItem(LS_HOLD, JSON.stringify(h)); }
+        function saveRawQueue(q) { localStorage.setItem(LS_QUEUE, JSON.stringify(q)); }
+        function saveRawHold(h) { localStorage.setItem(LS_HOLD, JSON.stringify(h)); }
+        function saveRawAcc(a) { localStorage.setItem(LS_ACC, JSON.stringify(a)); }
 
-        function getAcc() { return JSON.parse(localStorage.getItem(LS_ACC) || '[]'); }
-        function saveAcc(a) { localStorage.setItem(LS_ACC, JSON.stringify(a)); }
+        /* ===================================================================
+           3. TICKET ROUTING LOGIC (copied verbatim from Window B)
+           =================================================================== */
+        function isTicketInWindowSection(ticket, section) {
+            if (!ticket) return false;
+            var cur = ticket.currentSection;
+            var purp = (ticket.purpose || '').toLowerCase();
 
-        // Seed initial sample data if queues are completely empty
-        function initSeedDataIfEmpty() {
-            const currentQueue = getQueue();
-            const currentHold = getHold();
-            const currentAcc = getAcc();
+            if (section === 'C_B') {
+                return cur === 'C_B' || (!cur && purp === 'letas');
+            }
+            if (section === 'D_E') {
+                return cur === 'D_E' || (!cur && (purp === 'miscellaneous' || purp === 'misc'));
+            }
+            if (section === 'E_J') {
+                return cur === 'E_J' || (!cur && (purp === 'renewal' || purp === 'other'));
+            }
+            if (section === 'D_E_or_E_J') {
+                return cur === 'D_E' || cur === 'E_J' || (!cur && (purp === 'miscellaneous' || purp === 'misc' || purp === 'renewal' || purp === 'other'));
+            }
+            if (section === 'Cashier') {
+                return cur === 'Cashier';
+            }
+            if (section === 'M_N') {
+                return cur === 'M_N';
+            }
+            return false;
+        }
 
-            if (currentQueue.length === 0 && currentHold.length === 0 && currentAcc.length === 0) {
-                const seedTickets = [
-                    {
-                        ticketNumber: 'R-001',
-                        fileNumber: 'R00108022026',
-                        clientName: 'Juan Dela Cruz',
-                        date: '08/02/2026',
-                        time: '14:34',
-                        type: 'Regular',
-                        purpose: 'Renewal',
-                        comment: 'None',
-                        status: 'PENDING',
-                        currentSection: 'A',
-                        createdAt: Date.now() - 3600000,
-                        history: [
-                            { time: '13:34:02', desc: 'Created ticket R-001 (Renewal)' },
-                            { time: '13:35:10', desc: 'Assigned to Window A Queue' }
-                        ]
-                    },
-                    {
-                        ticketNumber: 'M-002',
-                        fileNumber: 'M00208022026',
-                        clientName: 'Maria Santos',
-                        date: '08/02/2026',
-                        time: '14:10',
-                        type: 'Priority',
-                        purpose: 'Miscellaneous',
-                        comment: 'Senior Citizen',
-                        status: 'CALLING',
-                        currentSection: 'D_E',
-                        createdAt: Date.now() - 2400000,
-                        history: [
-                            { time: '14:10:15', desc: 'Created ticket M-002 (Misc)' },
-                            { time: '14:12:00', desc: 'Called at Window D' }
-                        ]
-                    },
-                    {
-                        ticketNumber: 'L-003',
-                        fileNumber: 'L00308022026',
-                        clientName: 'Pedro Penduko',
-                        date: '08/02/2026',
-                        time: '14:15',
-                        type: 'Regular',
-                        purpose: 'LETAS',
-                        comment: 'None',
-                        status: 'ONHOLD',
-                        currentSection: 'C_B',
-                        createdAt: Date.now() - 1800000,
-                        history: [
-                            { time: '14:15:20', desc: 'Created ticket L-003 (LETAS)' },
-                            { time: '14:20:00', desc: 'Put On Hold at Window B' }
-                        ]
-                    },
-                    {
-                        ticketNumber: 'O-004',
-                        fileNumber: 'O00408022026',
-                        clientName: 'Ana Reyes',
-                        date: '08/02/2026',
-                        time: '13:50',
-                        type: 'Regular',
-                        purpose: 'Other',
-                        comment: 'Duplicate Request',
-                        status: 'COMPLETED',
-                        currentSection: 'Cashier',
-                        createdAt: Date.now() - 5000000,
-                        history: [
-                            { time: '13:50:00', desc: 'Created ticket O-004 (Other)' },
-                            { time: '14:05:00', desc: 'Transferred to Cashier' },
-                            { time: '14:25:00', desc: 'Completed at Cashier' }
-                        ]
-                    },
-                    {
-                        ticketNumber: 'R-005',
-                        fileNumber: 'R00508022026',
-                        clientName: 'Roberto Garcia',
-                        date: '08/02/2026',
-                        time: '14:28',
-                        type: 'Regular',
-                        purpose: 'Renewal',
-                        comment: 'None',
-                        status: 'PENDING',
-                        currentSection: 'E_J',
-                        createdAt: Date.now() - 900000,
-                        history: [
-                            { time: '14:28:40', desc: 'Created ticket R-005 (Renewal)' }
-                        ]
+        /* ===================================================================
+           4. getStatsForWindow() — EXACT COPY from Window B (lines 1319-1396)
+              Computes entries, accomplished, hourly arrays from REAL data
+           =================================================================== */
+        function getStatsForWindow(wId) {
+            var rawQ = JSON.parse(localStorage.getItem('lto_ticket_queue') || '[]');
+            var rawH = JSON.parse(localStorage.getItem('lto_onhold_queue') || '[]');
+            var rawA = JSON.parse(localStorage.getItem('lto_accomplished_queue') || '[]');
+
+            var allTickets = rawQ.concat(rawH).concat(rawA);
+
+            // Include tickets currently being called at each window
+            var windowIds = ['windowA', 'windowB', 'windowC', 'windowD', 'windowE', 'windowF', 'windowG', 'windowH', 'windowI', 'windowJ', 'windowM', 'windowN', 'cashier'];
+            windowIds.forEach(function (id) {
+                try {
+                    var callingData = JSON.parse(localStorage.getItem('lto_' + id + '_active_calling'));
+                    if (callingData && callingData.ticket) {
+                        var exists = allTickets.some(function (t) { return t.id === callingData.ticket.id; });
+                        if (!exists) allTickets.push(callingData.ticket);
                     }
-                ];
-
-                saveQueue([seedTickets[0], seedTickets[1], seedTickets[4]]);
-                saveHold([seedTickets[2]]);
-                saveAcc([seedTickets[3]]);
-            }
-        }
-        initSeedDataIfEmpty();
-
-        /* Get compiled array of all tickets in the entire system */
-        function getAllSystemTickets() {
-            const q = getQueue();
-            const h = getHold();
-            const a = getAcc();
-
-            // Merge avoiding duplicate ticketNumbers if any
-            const map = new Map();
-            q.forEach(t => map.set(t.ticketNumber, { ...t, status: t.status || 'PENDING' }));
-            h.forEach(t => map.set(t.ticketNumber, { ...t, status: 'ONHOLD' }));
-            a.forEach(t => map.set(t.ticketNumber, { ...t, status: 'COMPLETED' }));
-
-            return Array.from(map.values());
-        }
-
-        /* ===================================================================
-           3. INTERACTIVE GRAPH ENGINE (Canvas API)
-           =================================================================== */
-        let currentGraphType = 'Entries'; // 'Entries' or 'On Hold'
-
-        const entriesData = [15, 14, 2, 10, 12, 4, 11, 16, 15];
-        const onHoldData = [2, 1, 0, 3, 1, 0, 2, 4, 2];
-
-        function renderGraph() {
-            const canvas = document.getElementById('cp-graph-canvas');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-
-            // Handle retina displays
-            const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width * window.devicePixelRatio || 600;
-            canvas.height = rect.height * window.devicePixelRatio || 180;
-            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-
-            const width = rect.width;
-            const height = rect.height;
-
-            ctx.clearRect(0, 0, width, height);
-
-            const data = currentGraphType === 'Entries' ? entriesData : onHoldData;
-            const maxVal = Math.max(...data, 10) + 2;
-            const padding = { top: 25, right: 30, bottom: 30, left: 35 };
-
-            const graphW = width - padding.left - padding.right;
-            const graphH = height - padding.top - padding.bottom;
-
-            // Draw horizontal grid lines
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
-            ctx.lineWidth = 1;
-            const gridRows = 4;
-            for (let i = 0; i <= gridRows; i++) {
-                const y = padding.top + (graphH / gridRows) * i;
-                ctx.beginPath();
-                ctx.moveTo(padding.left, y);
-                ctx.lineTo(width - padding.right, y);
-                ctx.stroke();
-            }
-
-            // Draw X axis labels (0 to 8)
-            ctx.fillStyle = '#666666';
-            ctx.font = '11px sans-serif';
-            ctx.textAlign = 'center';
-            const stepX = graphW / (data.length - 1);
-
-            const points = [];
-            data.forEach((val, idx) => {
-                const x = padding.left + idx * stepX;
-                const y = padding.top + graphH - (val / maxVal) * graphH;
-                points.push({ x, y, val });
-
-                // X label
-                ctx.fillText(idx.toString(), x, height - 8);
+                } catch (e) { }
             });
 
-            // Draw Line Gradient Fill
-            ctx.beginPath();
-            ctx.moveTo(points[0].x, points[0].y);
-            for (let i = 1; i < points.length; i++) {
-                ctx.lineTo(points[i].x, points[i].y);
-            }
-            ctx.lineTo(points[points.length - 1].x, padding.top + graphH);
-            ctx.lineTo(points[0].x, padding.top + graphH);
-            ctx.closePath();
+            var entries = 0;
+            var accomplished = 0;
+            var hourly = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            var accHourly = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-            const areaGrad = ctx.createLinearGradient(0, padding.top, 0, height - padding.bottom);
-            if (currentGraphType === 'Entries') {
-                areaGrad.addColorStop(0, 'rgba(255, 51, 51, 0.25)');
-                areaGrad.addColorStop(1, 'rgba(255, 51, 51, 0.0)');
-            } else {
-                areaGrad.addColorStop(0, 'rgba(0, 71, 255, 0.2)');
-                areaGrad.addColorStop(1, 'rgba(0, 71, 255, 0.0)');
-            }
-            ctx.fillStyle = areaGrad;
-            ctx.fill();
+            allTickets.forEach(function (ticket) {
+                if (!ticket || !ticket.purpose) return;
+                var purp = (ticket.purpose || '').toLowerCase();
+                var cur = ticket.currentSection || '';
 
-            // Draw Connecting Line
-            ctx.beginPath();
-            ctx.moveTo(points[0].x, points[0].y);
-            for (let i = 1; i < points.length; i++) {
-                ctx.lineTo(points[i].x, points[i].y);
-            }
-            ctx.strokeStyle = currentGraphType === 'Entries' ? '#ff3333' : '#0052FF';
-            ctx.lineWidth = 2.5;
-            ctx.stroke();
+                var initRoute = [];
+                if (purp === 'miscellaneous' || purp === 'misc') initRoute = ['windowD', 'windowE'];
+                else if (purp === 'letas') initRoute = ['windowB', 'windowC'];
+                else initRoute = ['windowE', 'windowF', 'windowG', 'windowH', 'windowI', 'windowJ'];
 
-            // Draw Dots & Point Values
-            points.forEach(pt => {
-                ctx.beginPath();
-                ctx.arc(pt.x, pt.y, 4.5, 0, Math.PI * 2);
-                ctx.fillStyle = '#ffffff';
-                ctx.fill();
-                ctx.strokeStyle = currentGraphType === 'Entries' ? '#ff3333' : '#0052FF';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-            });
-        }
+                var hr = ticket.printedAt ? new Date(ticket.printedAt).getHours() : new Date().getHours();
+                if (hr < 0 || hr > 23) hr = new Date().getHours();
 
-        // Toggle Graph View
-        function setGraphType(type) {
-            currentGraphType = type;
-            document.getElementById('graph-view-title').textContent = type;
-            document.getElementById('dot-entries').classList.toggle('active', type === 'Entries');
-            document.getElementById('dot-onhold').classList.toggle('active', type === 'On Hold');
-            renderGraph();
-        }
+                if (initRoute.indexOf(wId) !== -1) {
+                    entries++;
+                    hourly[hr] = (hourly[hr] || 0) + 1;
 
-        document.getElementById('graph-toggle-btn').addEventListener('click', () => {
-            setGraphType(currentGraphType === 'Entries' ? 'On Hold' : 'Entries');
-        });
-        document.getElementById('dot-entries').addEventListener('click', () => setGraphType('Entries'));
-        document.getElementById('dot-onhold').addEventListener('click', () => setGraphType('On Hold'));
+                    if (cur === 'Cashier' || cur === 'M_N' || ticket.status === 'accomplished') {
+                        accomplished++;
+                        var accHr = ticket.accomplishedAt ? new Date(ticket.accomplishedAt).getHours() : hr;
+                        if (accHr < 0 || accHr > 23) accHr = hr;
+                        accHourly[accHr] = (accHourly[accHr] || 0) + 1;
+                    }
+                }
 
-        window.addEventListener('resize', renderGraph);
-        setTimeout(renderGraph, 100);
+                if (wId === 'cashier') {
+                    if (cur === 'Cashier' || cur === 'M_N' || ticket.status === 'accomplished') {
+                        entries++;
+                        hourly[hr] = (hourly[hr] || 0) + 1;
+                        if (cur === 'M_N' || ticket.status === 'accomplished') {
+                            accomplished++;
+                            accHourly[hr] = (accHourly[hr] || 0) + 1;
+                        }
+                    }
+                }
 
-        /* ===================================================================
-           4. SYSTEM PAUSE & RESET CONTROLS
-           =================================================================== */
-        function checkPauseState() {
-            const isPaused = localStorage.getItem(LS_PAUSED) === 'true';
-            const pauseBtn = document.getElementById('btn-system-pause');
-            const banner = document.getElementById('cp-pause-banner');
-
-            if (isPaused) {
-                pauseBtn.textContent = 'RESUME';
-                pauseBtn.classList.add('is-paused');
-                banner.classList.add('show');
-            } else {
-                pauseBtn.textContent = 'PAUSE';
-                pauseBtn.classList.remove('is-paused');
-                banner.classList.remove('show');
-            }
-        }
-        checkPauseState();
-
-        // Pause/Resume button handler
-        document.getElementById('btn-system-pause').addEventListener('click', () => {
-            const isPaused = localStorage.getItem(LS_PAUSED) === 'true';
-            const actionText = isPaused ? 'resume' : 'pause';
-
-            showConfirmModal({
-                icon: isPaused ? '▶️' : '⏸️',
-                title: isPaused ? 'RESUME SYSTEM' : 'PAUSE SYSTEM',
-                body: isPaused
-                    ? 'Are you sure you want to resume the system? Active ticket calling and user actions will be restored.'
-                    : 'Are you sure you want to pause the system? All active ticket calls will be suspended and user actions will be disabled across all windows.',
-                confirmText: isPaused ? 'RESUME SYSTEM' : 'PAUSE SYSTEM',
-                confirmClass: 'cp-mbtn-confirm',
-                onConfirm: () => {
-                    localStorage.setItem(LS_PAUSED, (!isPaused).toString());
-                    checkPauseState();
+                if (wId === 'windowM' || wId === 'windowN') {
+                    if (cur === 'M_N' || ticket.status === 'accomplished') {
+                        entries++;
+                        hourly[hr] = (hourly[hr] || 0) + 1;
+                        if (ticket.status === 'accomplished') {
+                            accomplished++;
+                            accHourly[hr] = (accHourly[hr] || 0) + 1;
+                        }
+                    }
                 }
             });
-        });
 
-        // Reset button handler
-        document.getElementById('btn-system-reset').addEventListener('click', () => {
-            showConfirmModal({
-                icon: '⚠️',
-                title: 'RESET SYSTEM',
-                body: 'WARNING: Are you sure you want to reset the entire system? This will clear all active queues, tickets, on-hold records, and accomplishment statistics.',
-                confirmText: 'RESET ALL DATA',
-                confirmClass: 'cp-mbtn-danger',
-                onConfirm: () => {
-                    localStorage.removeItem(LS_QUEUE);
-                    localStorage.removeItem(LS_HOLD);
-                    localStorage.removeItem(LS_ACC);
-                    localStorage.removeItem(LS_PAUSED);
-                    // Clear window calling states
-                    ['A','B','C','D','E','F','G','H','I','J','M','N','Cashier'].forEach(id => {
-                        localStorage.removeItem('lto_' + id + '_active_calling');
-                        localStorage.removeItem('lto_stats_' + id);
-                    });
+            return {
+                entries: entries,
+                accomplished: accomplished,
+                hourly: hourly,
+                accHourly: accHourly
+            };
+        }
 
-                    // Re-seed fresh state
-                    initSeedDataIfEmpty();
-                    checkPauseState();
-                    refreshAllData();
-                }
+        /* ===================================================================
+           5. WINDOW MAPPING & SECTION LOOKUP
+           =================================================================== */
+        var WINDOW_MAP = {
+            'windowB': { label: 'B', section: 'C_B' },
+            'windowC': { label: 'C', section: 'C_B' },
+            'windowE': { label: 'E', section: 'D_E_or_E_J' },
+            'windowF': { label: 'F', section: 'E_J' },
+            'windowG': { label: 'G', section: 'E_J' },
+            'windowH': { label: 'H', section: 'E_J' },
+            'windowI': { label: 'I', section: 'E_J' },
+            'windowJ': { label: 'J', section: 'E_J' },
+            'cashier':  { label: 'Cashier', section: 'Cashier' },
+            'windowM': { label: 'M', section: 'M_N' },
+            'windowN': { label: 'L', section: 'M_N' }
+        };
+
+        var ALL_WINDOW_IDS = Object.keys(WINDOW_MAP);
+
+        function getWindowSection(wId) {
+            return WINDOW_MAP[wId] ? WINDOW_MAP[wId].section : null;
+        }
+
+        function getWindowLabel(wId) {
+            return WINDOW_MAP[wId] ? WINDOW_MAP[wId].label : wId;
+        }
+
+        /* ===================================================================
+           6. STATISTICS COMPUTATION ENGINE (REAL DATA ONLY)
+           =================================================================== */
+        var selectedWindow = 'Overall';
+        var currentChartSlide = 0; // 0 = Entries, 1 = On Hold
+
+        function computeMetrics() {
+            var rawQ = getRawQueue();
+            var rawH = getRawHold();
+            var rawA = getRawAcc();
+
+            if (selectedWindow === 'Overall') {
+                // Deduplicate: count each ticket once based on its actual state
+                var allTicketsMap = {};
+                rawQ.forEach(function(t) { if (t && t.id) allTicketsMap[t.id] = t; });
+                rawH.forEach(function(t) { if (t && t.id) allTicketsMap[t.id] = t; });
+                rawA.forEach(function(t) { if (t && t.id) allTicketsMap[t.id] = t; });
+
+                // Include active calling tickets
+                ALL_WINDOW_IDS.forEach(function(wId) {
+                    try {
+                        var cd = JSON.parse(localStorage.getItem('lto_' + wId + '_active_calling'));
+                        if (cd && cd.ticket && cd.ticket.id) allTicketsMap[cd.ticket.id] = cd.ticket;
+                    } catch(e){}
+                });
+
+                var allTickets = Object.values(allTicketsMap);
+                var totalEntries = allTickets.length;
+                var waiting = 0, done = 0, onhold = 0;
+
+                allTickets.forEach(function(t) {
+                    var st = (t.status || '').toLowerCase();
+                    if (st === 'accomplished' || st === 'completed') done++;
+                    else if (rawH.some(function(h) { return h.id === t.id; })) onhold++;
+                    else waiting++;
+                });
+
+                return { entries: totalEntries, waiting: waiting, done: done, onhold: onhold };
+            } else {
+                // Per-window: filter by section
+                var section = getWindowSection(selectedWindow);
+                if (!section) return { entries: 0, waiting: 0, done: 0, onhold: 0 };
+
+                var qFiltered = rawQ.filter(function(t) { return isTicketInWindowSection(t, section); });
+                var hFiltered = rawH.filter(function(t) { return isTicketInWindowSection(t, section); });
+
+                // Use getStatsForWindow for entries/accomplished (it accounts for routing)
+                var st = getStatsForWindow(selectedWindow);
+
+                return {
+                    entries: st.entries,
+                    waiting: qFiltered.length,
+                    done: st.accomplished,
+                    onhold: hFiltered.length
+                };
+            }
+        }
+
+        function computeHourlyData() {
+            if (selectedWindow === 'Overall') {
+                // Aggregate hourly from all windows (deduplicated via getStatsForWindow logic)
+                // Use a combined approach: sum unique ticket hourly data
+                var combinedEntries = new Array(24).fill(0);
+                var combinedOnHold = new Array(24).fill(0);
+
+                // For entries: use getStatsForWindow across all unique purpose routes
+                // To avoid double counting, process tickets directly
+                var rawQ = getRawQueue();
+                var rawH = getRawHold();
+                var rawA = getRawAcc();
+                var allTicketsMap = {};
+                rawQ.forEach(function(t) { if (t && t.id) allTicketsMap[t.id] = t; });
+                rawH.forEach(function(t) { if (t && t.id) allTicketsMap[t.id] = t; });
+                rawA.forEach(function(t) { if (t && t.id) allTicketsMap[t.id] = t; });
+
+                ALL_WINDOW_IDS.forEach(function(wId) {
+                    try {
+                        var cd = JSON.parse(localStorage.getItem('lto_' + wId + '_active_calling'));
+                        if (cd && cd.ticket && cd.ticket.id) allTicketsMap[cd.ticket.id] = cd.ticket;
+                    } catch(e){}
+                });
+
+                var allTickets = Object.values(allTicketsMap);
+                allTickets.forEach(function(t) {
+                    if (!t) return;
+                    var hr = t.printedAt ? new Date(t.printedAt).getHours() : new Date().getHours();
+                    if (hr < 0 || hr > 23) hr = new Date().getHours();
+                    combinedEntries[hr]++;
+                });
+
+                // On hold hourly
+                rawH.forEach(function(t) {
+                    if (!t) return;
+                    var hr = t.printedAt ? new Date(t.printedAt).getHours() : new Date().getHours();
+                    if (hr < 0 || hr > 23) hr = new Date().getHours();
+                    combinedOnHold[hr]++;
+                });
+
+                return { entries: combinedEntries, onhold: combinedOnHold };
+            } else {
+                var st = getStatsForWindow(selectedWindow);
+                var entryHourly = Array.isArray(st.hourly) ? st.hourly.slice() : new Array(24).fill(0);
+                while (entryHourly.length < 24) entryHourly.push(0);
+
+                // On hold hourly for this window's section
+                var section = getWindowSection(selectedWindow);
+                var onholdHourly = new Array(24).fill(0);
+                getRawHold().forEach(function(t) {
+                    if (isTicketInWindowSection(t, section)) {
+                        var hr = t.printedAt ? new Date(t.printedAt).getHours() : new Date().getHours();
+                        if (hr < 0 || hr > 23) hr = new Date().getHours();
+                        onholdHourly[hr]++;
+                    }
+                });
+
+                return { entries: entryHourly, onhold: onholdHourly };
+            }
+        }
+
+        /* ===================================================================
+           7. SVG CHART DRAWING (Window B drawChart verbatim adaptation)
+           =================================================================== */
+        function drawChart(data, areaId, lineId, dotsId, xlbId, isOnHold, nodataId) {
+            var hasData = data.some(function(v) { return v > 0; });
+            var svgParent = document.getElementById(areaId).closest('svg');
+            var nodataEl = document.getElementById(nodataId);
+
+            if (!hasData) {
+                svgParent.style.display = 'none';
+                if (nodataEl) nodataEl.style.display = 'flex';
+                return;
+            }
+            svgParent.style.display = '';
+            if (nodataEl) nodataEl.style.display = 'none';
+
+            var pL = 38, pR = 6, pT = 8, pB = 10, W = 500, H = 128;
+            var cW = W - pL - pR, cH = H - pT - pB;
+            var maxV = Math.max.apply(null, data) || 1;
+            if (maxV < 10) maxV = 10;
+            var step = cW / Math.max(data.length - 1, 1);
+
+            var pts = data.map(function (v, i) {
+                return { x: pL + i * step, y: pT + cH - (v / maxV) * cH };
             });
+
+            document.getElementById(lineId).setAttribute('points',
+                pts.map(function (p) { return p.x + ',' + p.y; }).join(' '));
+
+            var bY = pT + cH;
+            document.getElementById(areaId).setAttribute('d',
+                'M' + pts[0].x + ',' + bY + ' ' + pts.map(function (p) { return 'L' + p.x + ',' + p.y; }).join(' ') + ' L' + pts[pts.length - 1].x + ',' + bY + ' Z');
+
+            var ns = 'http://www.w3.org/2000/svg';
+            var dg = document.getElementById(dotsId); dg.innerHTML = '';
+            pts.forEach(function (p) {
+                var c = document.createElementNS(ns, 'circle');
+                c.setAttribute('cx', p.x); c.setAttribute('cy', p.y); c.setAttribute('r', 4);
+                c.setAttribute('class', isOnHold ? 'cpc-dot-a' : 'cpc-dot-e');
+                dg.appendChild(c);
+            });
+
+            var xg = document.getElementById(xlbId); xg.innerHTML = '';
+            pts.forEach(function (p, i) {
+                var t = document.createElementNS(ns, 'text');
+                t.setAttribute('x', p.x); t.setAttribute('y', H);
+                t.setAttribute('text-anchor', 'middle'); t.setAttribute('class', 'cpc-lbl');
+                t.textContent = i;
+                xg.appendChild(t);
+            });
+        }
+
+        function refreshCharts() {
+            var hourlyData = computeHourlyData();
+            var curHr = new Date().getHours();
+
+            var eSlice = hourlyData.entries.slice(0, curHr + 1);
+            var aSlice = hourlyData.onhold.slice(0, curHr + 1);
+
+            if (eSlice.length < 2) { eSlice = [0, 0]; }
+            if (aSlice.length < 2) { aSlice = [0, 0]; }
+
+            drawChart(eSlice, 'cp-e-area', 'cp-e-line', 'cp-e-dots', 'cp-e-xlbl', false, 'cp-nodata-entries');
+            drawChart(aSlice, 'cp-a-area', 'cp-a-line', 'cp-a-dots', 'cp-a-xlbl', true, 'cp-nodata-onhold');
+        }
+
+        // Chart slide toggle
+        function setChartSlide(n) {
+            currentChartSlide = n;
+            document.getElementById('cp-slide-0').classList.toggle('active', n === 0);
+            document.getElementById('cp-slide-1').classList.toggle('active', n === 1);
+            document.getElementById('cp-sdot-0').classList.toggle('active', n === 0);
+            document.getElementById('cp-sdot-1').classList.toggle('active', n === 1);
+            document.getElementById('cp-graph-title').textContent =
+                n === 0 ? 'STATISTICS | Entries' : 'STATISTICS | On Hold';
+        }
+
+        document.getElementById('graph-toggle-btn').addEventListener('click', function() {
+            setChartSlide(currentChartSlide === 0 ? 1 : 0);
+        });
+        document.getElementById('cp-sdot-0').addEventListener('click', function() { setChartSlide(0); });
+        document.getElementById('cp-sdot-1').addEventListener('click', function() { setChartSlide(1); });
+
+        /* ===================================================================
+           8. WINDOW SELECTION DROPDOWN
+           =================================================================== */
+        document.getElementById('cp-window-select').addEventListener('change', function() {
+            selectedWindow = this.value;
+            var label = selectedWindow === 'Overall' ? 'OVERALL' : ('WINDOW ' + getWindowLabel(selectedWindow));
+            document.getElementById('cp-sub-title').textContent = label + ' | STATISTICS';
+            refreshAllData();
         });
 
         /* ===================================================================
-           5. TICKET LIST, SEARCH & SELECTION LOGIC
+           9. MASTER REFRESH (recalculate everything from real data)
            =================================================================== */
-        let selectedTicketNumber = null;
-
         function refreshAllData() {
-            const tickets = getAllSystemTickets();
+            // 1. Metrics
+            var m = computeMetrics();
+            document.getElementById('metric-entries').textContent = m.entries;
+            document.getElementById('metric-waiting').textContent = m.waiting;
+            document.getElementById('metric-done').textContent = m.done;
+            document.getElementById('metric-onhold').textContent = m.onhold;
 
-            // 1. Calculate Metrics
-            const total = tickets.length;
-            const waiting = tickets.filter(t => t.status === 'PENDING' || t.status === 'CALLING').length;
-            const done = tickets.filter(t => t.status === 'COMPLETED').length;
-            const onhold = tickets.filter(t => t.status === 'ONHOLD').length;
+            // 2. Charts
+            refreshCharts();
 
-            document.getElementById('metric-entries').textContent = total;
-            document.getElementById('metric-waiting').textContent = waiting;
-            document.getElementById('metric-done').textContent = done;
-            document.getElementById('metric-onhold').textContent = onhold;
+            // 3. Ticket List
+            renderTicketList();
 
-            // 2. Render List with Filter
-            renderTicketList(tickets);
-
-            // 3. Render Detail for selected or first ticket
-            if (tickets.length > 0) {
-                const target = tickets.find(t => t.ticketNumber === selectedTicketNumber) || tickets[0];
-                selectTicket(target);
-            } else {
-                clearTicketDetail();
+            // 4. Re-select ticket detail if one was selected
+            if (selectedTicketId) {
+                var all = getAllSystemTickets();
+                var found = all.find(function(t) { return t.id === selectedTicketId; });
+                if (found) {
+                    selectTicket(found);
+                } else {
+                    clearTicketDetail();
+                }
             }
-
-            renderGraph();
         }
 
-        function renderTicketList(tickets) {
-            const listEl = document.getElementById('cp-tickets-list');
-            const searchVal = (document.getElementById('cp-search-input').value || '').trim().toUpperCase();
+        /* ===================================================================
+           10. TICKET LIST, SEARCH & SELECTION
+           =================================================================== */
+        var selectedTicketId = null;
+
+        function fileNo(id) {
+            if (!id) return '—';
+            var h = 0;
+            for (var i = 0; i < id.length; i++) h += id.charCodeAt(i);
+            return id.replace('-', '') + '-' + ((h * 4317) % 90000000 + 10000000);
+        }
+
+        function getAllSystemTickets() {
+            var rawQ = getRawQueue();
+            var rawH = getRawHold();
+            var rawA = getRawAcc();
+
+            var map = {};
+            rawQ.forEach(function(t) { if (t && t.id) map[t.id] = { ticket: t, source: 'queue' }; });
+            rawH.forEach(function(t) { if (t && t.id) map[t.id] = { ticket: t, source: 'hold' }; });
+            rawA.forEach(function(t) { if (t && t.id) map[t.id] = { ticket: t, source: 'acc' }; });
+
+            // Include active calling tickets
+            ALL_WINDOW_IDS.forEach(function(wId) {
+                try {
+                    var cd = JSON.parse(localStorage.getItem('lto_' + wId + '_active_calling'));
+                    if (cd && cd.ticket && cd.ticket.id && !map[cd.ticket.id]) {
+                        map[cd.ticket.id] = { ticket: cd.ticket, source: 'calling' };
+                    }
+                } catch(e){}
+            });
+
+            return Object.values(map).map(function(entry) {
+                var t = entry.ticket;
+                var status = 'PENDING';
+                if (entry.source === 'hold') status = 'ONHOLD';
+                else if (entry.source === 'acc' || (t.status && t.status.toLowerCase() === 'accomplished')) status = 'COMPLETED';
+                else if (entry.source === 'calling') status = 'CALLING';
+                else if (t.status === 'TRANSFERRED') status = 'TRANSFERRED';
+                t._displayStatus = status;
+                return t;
+            });
+        }
+
+        function getTicketDisplayStatus(t) {
+            return t._displayStatus || 'PENDING';
+        }
+
+        function renderTicketList() {
+            var listEl = document.getElementById('cp-tickets-list');
+            var searchVal = (document.getElementById('cp-search-input').value || '').trim().toUpperCase();
+            var tickets = getAllSystemTickets();
 
             listEl.innerHTML = '';
 
-            const filtered = tickets.filter(t => {
+            var filtered = tickets.filter(function(t) {
                 if (!searchVal) return true;
-                const tNum = (t.ticketNumber || '').toUpperCase();
-                const fNum = (t.fileNumber || '').toUpperCase();
-                return tNum.includes(searchVal) || fNum.includes(searchVal);
+                var tNum = (t.id || '').toUpperCase();
+                var fNum = fileNo(t.id).toUpperCase();
+                var tName = (t.name || '').toUpperCase();
+                return tNum.indexOf(searchVal) !== -1 || fNum.indexOf(searchVal) !== -1 || tName.indexOf(searchVal) !== -1;
             });
 
             if (filtered.length === 0) {
-                listEl.innerHTML = '<div style="text-align:center; color:#666; padding:20px; font-weight:bold; font-size:0.85rem;">NO MATCHING ENTRIES FOUND</div>';
+                listEl.innerHTML = '<div style="text-align:center;color:#666;padding:20px;font-weight:bold;font-size:0.85rem;">NO MATCHING ENTRIES FOUND</div>';
                 return;
             }
 
-            filtered.forEach(t => {
-                const item = document.createElement('div');
-                item.className = 'cp-ticket-item' + (t.ticketNumber === selectedTicketNumber ? ' active' : '');
+            filtered.forEach(function(t) {
+                var item = document.createElement('div');
+                var status = getTicketDisplayStatus(t);
+                item.className = 'cp-ticket-item' + (t.id === selectedTicketId ? ' active' : '');
 
-                let badgeClass = 'cp-badge-pending';
-                if (t.status === 'CALLING') badgeClass = 'cp-badge-calling';
-                if (t.status === 'ONHOLD') badgeClass = 'cp-badge-onhold';
-                if (t.status === 'COMPLETED') badgeClass = 'cp-badge-completed';
-                if (t.status === 'TRANSFERRED') badgeClass = 'cp-badge-transferred';
+                var badgeClass = 'cp-badge-pending';
+                if (status === 'CALLING') badgeClass = 'cp-badge-calling';
+                if (status === 'ONHOLD') badgeClass = 'cp-badge-onhold';
+                if (status === 'COMPLETED') badgeClass = 'cp-badge-completed';
+                if (status === 'TRANSFERRED') badgeClass = 'cp-badge-transferred';
 
-                item.innerHTML = `
-                    <div class="cp-titem-left">
-                        <span class="cp-titem-num">${t.ticketNumber || 'N/A'}</span>
-                        <span class="cp-titem-file">${t.fileNumber || ''}</span>
-                    </div>
-                    <div class="cp-titem-right">
-                        <span class="cp-badge ${badgeClass}">${t.status || 'PENDING'}</span>
-                    </div>
-                `;
+                item.innerHTML =
+                    '<div class="cp-titem-left">' +
+                        '<span class="cp-titem-num">' + (t.id || 'N/A') + '</span>' +
+                        '<span class="cp-titem-file">' + fileNo(t.id) + '</span>' +
+                    '</div>' +
+                    '<div class="cp-titem-right">' +
+                        '<span class="cp-badge ' + badgeClass + '">' + status + '</span>' +
+                    '</div>';
 
-                item.addEventListener('click', () => selectTicket(t));
+                (function(ticket) {
+                    item.addEventListener('click', function() { selectTicket(ticket); });
+                })(t);
                 listEl.appendChild(item);
             });
         }
 
-        // Search input filter listener
-        document.getElementById('cp-search-input').addEventListener('input', () => {
-            renderTicketList(getAllSystemTickets());
-        });
+        document.getElementById('cp-search-input').addEventListener('input', renderTicketList);
 
-        // Select ticket and update left detail panel
         function selectTicket(t) {
             if (!t) return;
-            selectedTicketNumber = t.ticketNumber;
+            selectedTicketId = t.id;
+            var status = getTicketDisplayStatus(t);
 
-            document.getElementById('det-name').textContent = t.clientName || 'N/A';
-            document.getElementById('det-date').textContent = t.date || 'N/A';
-            document.getElementById('det-time').textContent = t.time || 'N/A';
+            document.getElementById('det-name').textContent = t.name || 'N/A';
+
+            var printDate = t.printedAt ? new Date(t.printedAt) : null;
+            document.getElementById('det-date').textContent = printDate
+                ? printDate.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })
+                : (t.date || 'N/A');
+            document.getElementById('det-time').textContent = printDate
+                ? printDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
+                : (t.time || 'N/A');
+
             document.getElementById('det-type').textContent = t.type || 'Regular';
             document.getElementById('det-purpose').textContent = t.purpose || 'N/A';
             document.getElementById('det-comment').textContent = t.comment || 'None';
 
-            const statusEl = document.getElementById('det-status');
-            statusEl.textContent = t.status || 'PENDING';
-
-            if (t.status === 'COMPLETED') statusEl.style.color = '#155724';
-            else if (t.status === 'ONHOLD') statusEl.style.color = '#856404';
-            else if (t.status === 'CALLING') statusEl.style.color = '#d60052';
+            var statusEl = document.getElementById('det-status');
+            statusEl.textContent = status;
+            if (status === 'COMPLETED') statusEl.style.color = '#155724';
+            else if (status === 'ONHOLD') statusEl.style.color = '#856404';
+            else if (status === 'CALLING') statusEl.style.color = '#d60052';
             else statusEl.style.color = '#0052FF';
 
-            document.getElementById('det-ticket-num').textContent = t.ticketNumber || '---';
-            document.getElementById('det-file-num').textContent = 'File No. ' + (t.fileNumber || 'N/A');
+            document.getElementById('det-ticket-num').textContent = t.id || '---';
+            document.getElementById('det-file-num').textContent = 'File No. ' + fileNo(t.id);
 
-            // Action History
-            const histList = document.getElementById('det-history-list');
+            // History
+            var histList = document.getElementById('det-history-list');
             histList.innerHTML = '';
+            var history = t.history || [];
+            if (history.length === 0) {
+                histList.innerHTML = '<div class="cp-history-item"><span class="cp-history-desc">No history recorded</span></div>';
+            } else {
+                history.forEach(function(h) {
+                    var hRow = document.createElement('div');
+                    hRow.className = 'cp-history-item';
+                    hRow.innerHTML = '<span class="cp-history-time">' + (h.time || '') + '</span><span class="cp-history-desc">' + (h.desc || '') + '</span>';
+                    histList.appendChild(hRow);
+                });
+            }
 
-            const history = t.history || [
-                { time: t.time || '14:00', desc: `Created ticket ${t.ticketNumber}` }
-            ];
-
-            history.forEach(h => {
-                const hRow = document.createElement('div');
-                hRow.className = 'cp-history-item';
-                hRow.innerHTML = `
-                    <span class="cp-history-time">${h.time || ''}</span>
-                    <span class="cp-history-desc">${h.desc || ''}</span>
-                `;
-                histList.appendChild(hRow);
+            // Active state in list
+            document.querySelectorAll('.cp-ticket-item').forEach(function(el) {
+                el.classList.toggle('active', el.querySelector('.cp-titem-num').textContent === t.id);
             });
 
-            // Re-render list active state
-            document.querySelectorAll('.cp-ticket-item').forEach(el => {
-                const isSelected = el.querySelector('.cp-titem-num').textContent === t.ticketNumber;
-                el.classList.toggle('active', isSelected);
-            });
-
-            // Action buttons state
-            const isCompleted = t.status === 'COMPLETED';
+            // Enable/disable action buttons
+            var isCompleted = status === 'COMPLETED';
             document.getElementById('btn-act-complete').disabled = isCompleted;
+            document.getElementById('btn-act-transfer').disabled = isCompleted;
+            document.getElementById('btn-act-delete').disabled = false;
         }
 
         function clearTicketDetail() {
-            selectedTicketNumber = null;
+            selectedTicketId = null;
             document.getElementById('det-name').textContent = '—';
             document.getElementById('det-date').textContent = '—';
             document.getElementById('det-time').textContent = '—';
@@ -699,132 +974,268 @@
             document.getElementById('det-ticket-num').textContent = '---';
             document.getElementById('det-file-num').textContent = 'File No. —';
             document.getElementById('det-history-list').innerHTML = '<div class="cp-history-item"><span class="cp-history-desc">No ticket selected</span></div>';
+            document.getElementById('btn-act-complete').disabled = true;
+            document.getElementById('btn-act-transfer').disabled = true;
+            document.getElementById('btn-act-delete').disabled = true;
         }
 
         /* ===================================================================
-           6. TICKET MODIFICATION ACTIONS (COMPLETE, TRANSFER, DELETE)
+           11. SYSTEM PAUSE & RESET
+           =================================================================== */
+        function checkPauseState() {
+            var isPaused = localStorage.getItem(LS_PAUSED) === 'true';
+            var pauseBtn = document.getElementById('btn-system-pause');
+            var banner = document.getElementById('cp-pause-banner');
+            pauseBtn.textContent = isPaused ? 'RESUME' : 'PAUSE';
+            pauseBtn.classList.toggle('is-paused', isPaused);
+            banner.classList.toggle('show', isPaused);
+        }
+        checkPauseState();
+
+        document.getElementById('btn-system-pause').addEventListener('click', function() {
+            var isPaused = localStorage.getItem(LS_PAUSED) === 'true';
+            showConfirmModal({
+                icon: isPaused ? '▶️' : '⏸️',
+                title: isPaused ? 'RESUME SYSTEM' : 'PAUSE SYSTEM',
+                body: isPaused
+                    ? 'Resume the system? Active ticket calling and user actions will be restored.'
+                    : 'Pause the system? All active ticket calls will be suspended and actions disabled across all windows.',
+                confirmText: isPaused ? 'RESUME SYSTEM' : 'PAUSE SYSTEM',
+                confirmClass: 'cp-mbtn-confirm',
+                onConfirm: function() {
+                    localStorage.setItem(LS_PAUSED, (!isPaused).toString());
+                    checkPauseState();
+                }
+            });
+        });
+
+        document.getElementById('btn-system-reset').addEventListener('click', function() {
+            showConfirmModal({
+                icon: '⚠️',
+                title: 'RESET SYSTEM',
+                body: 'WARNING: This will clear ALL active queues, tickets, on-hold records, accomplished data, and calling states across the entire system. This cannot be undone.',
+                confirmText: 'RESET ALL DATA',
+                confirmClass: 'cp-mbtn-danger',
+                onConfirm: function() {
+                    localStorage.removeItem(LS_QUEUE);
+                    localStorage.removeItem(LS_HOLD);
+                    localStorage.removeItem(LS_ACC);
+                    localStorage.removeItem(LS_PAUSED);
+                    ['A','B','C','D','E','F','G','H','I','J','M','N','Cashier','cashier'].forEach(function(id) {
+                        localStorage.removeItem('lto_window' + id + '_active_calling');
+                        localStorage.removeItem('lto_' + id + '_active_calling');
+                        localStorage.removeItem('lto_stats_window' + id);
+                        localStorage.removeItem('lto_stats_' + id);
+                    });
+                    checkPauseState();
+                    selectedTicketId = null;
+                    clearTicketDetail();
+                    refreshAllData();
+                    showToast('System reset complete. All data cleared.', 'login');
+                }
+            });
+        });
+
+        /* ===================================================================
+           12. TICKET MODIFICATION ACTIONS (COMPLETE, TRANSFER, DELETE)
            =================================================================== */
         function getSelectedTicket() {
-            if (!selectedTicketNumber) return null;
-            return getAllSystemTickets().find(t => t.ticketNumber === selectedTicketNumber);
+            if (!selectedTicketId) return null;
+            return getAllSystemTickets().find(function(t) { return t.id === selectedTicketId; });
         }
 
-        // COMPLETE BUTTON
-        document.getElementById('btn-act-complete').addEventListener('click', () => {
-            const ticket = getSelectedTicket();
+        function getNowTimeStr() {
+            return new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+
+        function addHistoryEntry(ticket, desc) {
+            if (!ticket.history) ticket.history = [];
+            ticket.history.push({ time: getNowTimeStr(), desc: desc });
+        }
+
+        // Determine which window a ticket is currently at
+        function getCurrentWindowLabel(ticket) {
+            var cur = ticket.currentSection || '';
+            if (cur === 'C_B') return 'B/C';
+            if (cur === 'D_E') return 'D/E';
+            if (cur === 'E_J') return 'E-J';
+            if (cur === 'Cashier') return 'Cashier';
+            if (cur === 'M_N') return 'M/L';
+            if (cur === 'D_E_or_E_J') return 'E';
+            return 'A (Registration)';
+        }
+
+        // COMPLETE
+        document.getElementById('btn-act-complete').addEventListener('click', function() {
+            var ticket = getSelectedTicket();
             if (!ticket) return;
 
             showConfirmModal({
                 icon: '✅',
                 title: 'COMPLETE TICKET',
-                body: `Are you sure you want to mark ticket ${ticket.ticketNumber} (${ticket.fileNumber}) as COMPLETED? This will bypass normal window routing.`,
+                body: 'Mark ticket ' + ticket.id + ' (' + fileNo(ticket.id) + ') as COMPLETED? This bypasses normal window routing.',
                 confirmText: 'MARK AS COMPLETED',
                 confirmClass: 'cp-mbtn-confirm',
-                onConfirm: () => {
-                    const nowTime = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                    const newHistory = [...(ticket.history || []), { time: nowTime, desc: 'Bypassed & Marked Completed via Control Panel' }];
+                onConfirm: function() {
+                    addHistoryEntry(ticket, 'Bypassed & Marked Completed via Control Panel');
+                    ticket.status = 'accomplished';
+                    ticket.accomplishedAt = Date.now();
 
-                    const updatedTicket = { ...ticket, status: 'COMPLETED', history: newHistory };
+                    // Remove from queue and hold
+                    saveRawQueue(getRawQueue().filter(function(t) { return t.id !== ticket.id; }));
+                    saveRawHold(getRawHold().filter(function(t) { return t.id !== ticket.id; }));
 
-                    // Remove from queue/hold, add to acc
-                    saveQueue(getQueue().filter(t => t.ticketNumber !== ticket.ticketNumber));
-                    saveHold(getHold().filter(t => t.ticketNumber !== ticket.ticketNumber));
+                    // Remove from active calling if present
+                    ALL_WINDOW_IDS.forEach(function(wId) {
+                        try {
+                            var cd = JSON.parse(localStorage.getItem('lto_' + wId + '_active_calling'));
+                            if (cd && cd.ticket && cd.ticket.id === ticket.id) {
+                                localStorage.removeItem('lto_' + wId + '_active_calling');
+                            }
+                        } catch(e){}
+                    });
 
-                    const acc = getAcc().filter(t => t.ticketNumber !== ticket.ticketNumber);
-                    acc.push(updatedTicket);
-                    saveAcc(acc);
+                    // Add to accomplished
+                    var acc = getRawAcc().filter(function(t) { return t.id !== ticket.id; });
+                    acc.push(ticket);
+                    saveRawAcc(acc);
 
                     refreshAllData();
+                    showToast('Ticket ' + ticket.id + ' marked as COMPLETED.', 'login');
                 }
             });
         });
 
-        // TRANSFER BUTTON
-        document.getElementById('btn-act-transfer').addEventListener('click', () => {
-            const ticket = getSelectedTicket();
+        // TRANSFER — restricted destinations
+        document.getElementById('btn-act-transfer').addEventListener('click', function() {
+            var ticket = getSelectedTicket();
             if (!ticket) return;
 
-            const extraSelectHTML = `
-                <div style="text-align:left; font-size:0.85rem; font-weight:bold; color:#333; margin-top:10px;">Select Destination Window:</div>
-                <select id="transfer-dest-select" class="cp-modal-select">
-                    <option value="A">Window A (Registration)</option>
-                    <option value="C_B">Window B / C (LETAS)</option>
-                    <option value="D_E">Window D / E (Misc)</option>
-                    <option value="E_J">Window F – J (Renewal)</option>
-                    <option value="M_N">Window M / N</option>
-                    <option value="Cashier">Cashier Counter</option>
-                </select>
-            `;
+            var currentSection = ticket.currentSection || '';
+            var currentLabel = getCurrentWindowLabel(ticket);
+
+            // Build destination options excluding current section
+            var destOptions = '';
+            var transferDests = [
+                { value: 'C_B', windowId: 'windowB', label: 'Window B' },
+                { value: 'C_B', windowId: 'windowC', label: 'Window C' },
+                { value: 'D_E_or_E_J', windowId: 'windowE', label: 'Window E' },
+                { value: 'E_J', windowId: 'windowF', label: 'Window F' },
+                { value: 'E_J', windowId: 'windowG', label: 'Window G' },
+                { value: 'E_J', windowId: 'windowH', label: 'Window H' },
+                { value: 'E_J', windowId: 'windowI', label: 'Window I' },
+                { value: 'E_J', windowId: 'windowJ', label: 'Window J' },
+                { value: 'Cashier', windowId: 'cashier', label: 'Cashier' },
+                { value: 'M_N', windowId: 'windowM', label: 'Window M' },
+                { value: 'M_N', windowId: 'windowN', label: 'Window L' }
+            ];
+
+            transferDests.forEach(function(d) {
+                // Don't offer the ticket's current section as destination
+                if (d.value === currentSection) return;
+                destOptions += '<option value="' + d.value + '" data-label="' + d.label + '">' + d.label + '</option>';
+            });
+
+            var extraHTML =
+                '<div style="text-align:left;font-size:0.8rem;margin-top:12px;color:#333;">' +
+                    '<div style="margin-bottom:6px;"><strong>Ticket:</strong> ' + ticket.id + '</div>' +
+                    '<div style="margin-bottom:6px;"><strong>File No.:</strong> ' + fileNo(ticket.id) + '</div>' +
+                    '<div style="margin-bottom:6px;"><strong>Current Window:</strong> ' + currentLabel + '</div>' +
+                    '<div style="margin-bottom:8px;font-weight:900;">Transfer Destination:</div>' +
+                '</div>' +
+                '<select id="transfer-dest-select" class="cp-modal-select">' + destOptions + '</select>';
 
             showConfirmModal({
                 icon: '🔄',
                 title: 'TRANSFER TICKET',
-                body: `Transfer ticket ${ticket.ticketNumber} (${ticket.fileNumber}) to another window counter:`,
-                extraContentHTML: extraSelectHTML,
+                body: 'Transfer ticket ' + ticket.id + ' to another window:',
+                extraContentHTML: extraHTML,
                 confirmText: 'EXECUTE TRANSFER',
                 confirmClass: 'cp-mbtn-confirm',
-                onConfirm: () => {
-                    const dest = document.getElementById('transfer-dest-select').value;
-                    const destName = document.getElementById('transfer-dest-select').options[document.getElementById('transfer-dest-select').selectedIndex].text;
-                    const nowTime = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                onConfirm: function() {
+                    var sel = document.getElementById('transfer-dest-select');
+                    var destSection = sel.value;
+                    var destLabel = sel.options[sel.selectedIndex].getAttribute('data-label');
 
-                    const newHistory = [...(ticket.history || []), { time: nowTime, desc: `Transferred to ${destName}` }];
-                    const updatedTicket = { ...ticket, status: 'TRANSFERRED', currentSection: dest, history: newHistory };
+                    addHistoryEntry(ticket, 'Transferred from ' + currentLabel + ' to ' + destLabel + ' via Control Panel');
+                    ticket.currentSection = destSection;
+                    ticket.status = 'pending';
 
-                    // Remove from hold/acc, ensure in main queue
-                    saveHold(getHold().filter(t => t.ticketNumber !== ticket.ticketNumber));
-                    saveAcc(getAcc().filter(t => t.ticketNumber !== ticket.ticketNumber));
+                    // Remove from hold
+                    saveRawHold(getRawHold().filter(function(t) { return t.id !== ticket.id; }));
+                    // Remove from acc
+                    saveRawAcc(getRawAcc().filter(function(t) { return t.id !== ticket.id; }));
 
-                    const q = getQueue().filter(t => t.ticketNumber !== ticket.ticketNumber);
-                    q.push(updatedTicket);
-                    saveQueue(q);
+                    // Remove from active calling if present
+                    ALL_WINDOW_IDS.forEach(function(wId) {
+                        try {
+                            var cd = JSON.parse(localStorage.getItem('lto_' + wId + '_active_calling'));
+                            if (cd && cd.ticket && cd.ticket.id === ticket.id) {
+                                localStorage.removeItem('lto_' + wId + '_active_calling');
+                            }
+                        } catch(e){}
+                    });
+
+                    // Add/update in main queue
+                    var q = getRawQueue().filter(function(t) { return t.id !== ticket.id; });
+                    q.push(ticket);
+                    saveRawQueue(q);
 
                     refreshAllData();
+                    showToast('Ticket ' + ticket.id + ' transferred to ' + destLabel + '.', 'login');
                 }
             });
         });
 
-        // DELETE BUTTON
-        document.getElementById('btn-act-delete').addEventListener('click', () => {
-            const ticket = getSelectedTicket();
+        // DELETE
+        document.getElementById('btn-act-delete').addEventListener('click', function() {
+            var ticket = getSelectedTicket();
             if (!ticket) return;
 
             showConfirmModal({
                 icon: '🗑️',
                 title: 'DELETE TICKET',
-                body: `WARNING: Are you sure you want to permanently delete ticket ${ticket.ticketNumber} (${ticket.fileNumber}) from the active system records?`,
+                body: 'WARNING: Permanently delete ticket ' + ticket.id + ' (' + fileNo(ticket.id) + ') from all system records? This cannot be undone.',
                 confirmText: 'PERMANENTLY DELETE',
                 confirmClass: 'cp-mbtn-danger',
-                onConfirm: () => {
-                    saveQueue(getQueue().filter(t => t.ticketNumber !== ticket.ticketNumber));
-                    saveHold(getHold().filter(t => t.ticketNumber !== ticket.ticketNumber));
-                    saveAcc(getAcc().filter(t => t.ticketNumber !== ticket.ticketNumber));
+                onConfirm: function() {
+                    saveRawQueue(getRawQueue().filter(function(t) { return t.id !== ticket.id; }));
+                    saveRawHold(getRawHold().filter(function(t) { return t.id !== ticket.id; }));
+                    saveRawAcc(getRawAcc().filter(function(t) { return t.id !== ticket.id; }));
 
-                    selectedTicketNumber = null;
+                    ALL_WINDOW_IDS.forEach(function(wId) {
+                        try {
+                            var cd = JSON.parse(localStorage.getItem('lto_' + wId + '_active_calling'));
+                            if (cd && cd.ticket && cd.ticket.id === ticket.id) {
+                                localStorage.removeItem('lto_' + wId + '_active_calling');
+                            }
+                        } catch(e){}
+                    });
+
+                    selectedTicketId = null;
+                    clearTicketDetail();
                     refreshAllData();
+                    showToast('Ticket ' + ticket.id + ' permanently deleted.', 'login');
                 }
             });
         });
 
         /* ===================================================================
-           7. MODAL CONFIRMATION DIALOG ENGINE
+           13. MODAL CONFIRMATION ENGINE
            =================================================================== */
-        let currentModalCallback = null;
+        var currentModalCallback = null;
 
         function showConfirmModal(opts) {
             document.getElementById('modal-icon').textContent = opts.icon || '⚠️';
             document.getElementById('modal-title').textContent = opts.title || 'CONFIRM ACTION';
             document.getElementById('modal-body').textContent = opts.body || '';
+            document.getElementById('modal-extra-content').innerHTML = opts.extraContentHTML || '';
 
-            const extraContainer = document.getElementById('modal-extra-content');
-            extraContainer.innerHTML = opts.extraContentHTML || '';
-
-            const confirmBtn = document.getElementById('modal-btn-confirm');
+            var confirmBtn = document.getElementById('modal-btn-confirm');
             confirmBtn.textContent = opts.confirmText || 'CONFIRM';
             confirmBtn.className = 'cp-modal-btn ' + (opts.confirmClass || 'cp-mbtn-confirm');
 
             currentModalCallback = opts.onConfirm || null;
-
             document.getElementById('cp-modal-overlay').classList.add('show');
         }
 
@@ -834,13 +1245,57 @@
         }
 
         document.getElementById('modal-btn-cancel').addEventListener('click', hideConfirmModal);
-        document.getElementById('modal-btn-confirm').addEventListener('click', () => {
+        document.getElementById('modal-btn-confirm').addEventListener('click', function() {
             if (currentModalCallback) currentModalCallback();
             hideConfirmModal();
         });
 
-        // Initial Data Refresh
-        refreshAllData();
+        /* ===================================================================
+           14. TOAST NOTIFICATION (matching existing system)
+           =================================================================== */
+        function showToast(msg, type) {
+            var c = document.getElementById('toast-container');
+            var t = document.createElement('div');
+            t.className = 'toast toast-' + (type || 'login');
+            t.innerHTML = '<span>' + msg + '</span>';
+            c.appendChild(t);
+            setTimeout(function () { t.classList.add('show'); }, 50);
+            setTimeout(function () {
+                t.classList.remove('show');
+                setTimeout(function () { t.remove(); }, 300);
+            }, 2500);
+        }
+
+        /* ===================================================================
+           15. SKELETON LOADING & INIT
+           =================================================================== */
+        (function() {
+            // Apply skeleton to cards on initial load
+            var skStart = Date.now();
+            document.querySelectorAll('.cp-detail-card, .cp-list-card, .cp-graph-card').forEach(function(el) {
+                el.classList.add('skeleton-card');
+            });
+
+            // Read data and reveal
+            refreshAllData();
+            var elapsed = Date.now() - skStart;
+            setTimeout(function() {
+                document.querySelectorAll('.cp-detail-card, .cp-list-card, .cp-graph-card').forEach(function(el, i) {
+                    setTimeout(function() {
+                        el.classList.remove('skeleton-card');
+                        el.classList.add('card-revealed');
+                    }, i * 80);
+                });
+            }, Math.max(0, 300 - elapsed));
+        })();
+
+        /* ===================================================================
+           16. LIVE POLLING — 3-second interval (matching Window B)
+           =================================================================== */
+        setInterval(function() {
+            refreshAllData();
+            checkPauseState();
+        }, 3000);
     </script>
 </body>
 
