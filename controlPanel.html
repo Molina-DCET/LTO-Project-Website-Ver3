@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LTO Cabuyao District Office - Control Panel</title>
+    <meta name="description" content="Land Transportation Office Cabuyao District Office System Control Panel">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script>
+        // Page transition: fade-exit on any internal link click
+        document.addEventListener('click', function(e) {
+            const link = e.target.closest('a[href]');
+            if (link && !link.href.startsWith('#') && link.target !== '_blank' && !link.href.startsWith('javascript')) {
+                e.preventDefault();
+                const dest = link.href;
+                document.body.classList.add('page-exit');
+                setTimeout(function() { window.location.href = dest; }, 250);
+            }
+        });
+    </script>
+</head>
+
+<body>
+
+    <a class="skip-nav" href="#main-content">Skip to main content</a>
+
+    <!-- Header Section -->
+    <header class="header">
+        <div class="header-left">
+            <img src="img/logo.png" alt="LTO Logo" class="header-logo">
+            <div class="header-title-container">
+                <h1 class="header-title">LAND TRANSPORTATION OFFICE</h1>
+                <p class="header-subtitle">CABUYAO DISTRICT OFFICE</p>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <div class="time-container">
+                <span class="date-text" id="date-display">August 02, 2026</span>
+                <span class="time-text" id="time-display">14:34:33</span>
+            </div>
+            <a href="windowList.html" class="admin-btn">WINDOW LIST</a>
+            <a href="login.html" class="logout-btn-header" id="header-logout-btn" style="background: linear-gradient(180deg, #ff1a1a 0%, #b30000 100%); padding: 8px 24px; border-radius: 20px; color: #fff; font-weight: 900; text-decoration: none; font-size: 0.95rem; border: 1.5px solid rgba(255,255,255,0.4); text-transform: uppercase;">LOGOUT</a>
+        </div>
+    </header>
+
+    <!-- Sub Navigation Breadcrumbs -->
+    <nav class="sub-nav" aria-label="Section navigation">
+        <a href="windowList.html" class="sub-nav-item">Windows</a>
+        <span class="sub-nav-separator" aria-hidden="true">›</span>
+        <span class="sub-nav-item active" aria-current="page">Control Panel</span>
+    </nav>
+
+    <!-- System Paused Overlay Banner -->
+    <div class="cp-pause-banner" id="cp-pause-banner">
+        <span>⏸ SYSTEM PAUSED — All active ticket calling and user actions are currently suspended.</span>
+    </div>
+
+    <!-- Main Control Panel Hero Layout -->
+    <main class="hero cp-hero" id="main-content">
+        <!-- Faint Watermark Logo in Background -->
+        <img src="img/logo.png" alt="LTO Logo Watermark" class="hero-watermark">
+
+        <div class="cp-container">
+            <!-- Header Row: Title & Subtitle -->
+            <div class="cp-header-row">
+                <h1 class="cp-main-title">CONTROL PANEL</h1>
+                <div class="cp-sub-title">OVERALL | STATISTICS</div>
+            </div>
+
+            <!-- Top Section: Status Metrics Stack + Interactive Graph Card -->
+            <div class="cp-top-grid">
+                <!-- Status Information Metrics Stack -->
+                <div class="cp-metrics-stack">
+                    <div class="cp-metric-item">
+                        <span class="cp-metric-num" id="metric-entries">357</span>
+                        <span class="cp-metric-label">ENTRIES</span>
+                    </div>
+                    <div class="cp-metric-item">
+                        <span class="cp-metric-num" id="metric-waiting">200</span>
+                        <span class="cp-metric-label">WAITING</span>
+                    </div>
+                    <div class="cp-metric-item">
+                        <span class="cp-metric-num" id="metric-done">10</span>
+                        <span class="cp-metric-label">DONE</span>
+                    </div>
+                    <div class="cp-metric-item">
+                        <span class="cp-metric-num" id="metric-onhold">2</span>
+                        <span class="cp-metric-label">ONHOLD</span>
+                    </div>
+                </div>
+
+                <!-- Interactive Graph Card -->
+                <div class="cp-graph-card">
+                    <div class="cp-graph-header">
+                        <span class="cp-graph-title">STATISTICS | <span id="graph-view-title">Entries</span></span>
+                        <button type="button" class="cp-graph-toggle-btn" id="graph-toggle-btn" title="Switch Graph View" aria-label="Switch Graph View">→</button>
+                    </div>
+
+                    <div class="cp-graph-canvas-container">
+                        <canvas id="cp-graph-canvas" class="cp-graph-canvas"></canvas>
+                    </div>
+
+                    <div class="cp-graph-dots">
+                        <span class="cp-dot dot-entries active" id="dot-entries" title="Show Entries Graph"></span>
+                        <span class="cp-dot dot-onhold" id="dot-onhold" title="Show On Hold Graph"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Modification Controls: RESET & PAUSE/RESUME -->
+            <div class="cp-controls-row">
+                <button type="button" class="cp-ctrl-btn cp-btn-reset" id="btn-system-reset">RESET</button>
+                <button type="button" class="cp-ctrl-btn cp-btn-pause" id="btn-system-pause">PAUSE</button>
+            </div>
+
+            <!-- Section Header: TICKET ENTRIES -->
+            <h2 class="cp-section-header">TICKET ENTRIES</h2>
+
+            <!-- Bottom Section: Selected Ticket Detail + Ticket Search List Grid -->
+            <div class="cp-entries-grid">
+                <!-- Left Detail Card -->
+                <div class="cp-detail-card" id="cp-detail-card">
+                    <div class="cp-detail-top">
+                        <!-- Transaction Info Pane -->
+                        <div class="cp-info-group">
+                            <div class="cp-info-title">TRANSACTION INFO</div>
+                            <div class="cp-info-row">
+                                <span class="cp-info-lbl">NAME:</span>
+                                <span class="cp-info-val" id="det-name">Juan Dela Cruz</span>
+                            </div>
+                            <div class="cp-info-row">
+                                <span class="cp-info-lbl">DATE:</span>
+                                <span class="cp-info-val" id="det-date">08/02/2026</span>
+                            </div>
+                            <div class="cp-info-row">
+                                <span class="cp-info-lbl">TIME:</span>
+                                <span class="cp-info-val" id="det-time">14:34</span>
+                            </div>
+                            <div class="cp-info-row">
+                                <span class="cp-info-lbl">TYPE:</span>
+                                <span class="cp-info-val" id="det-type">Regular</span>
+                            </div>
+                            <div class="cp-info-row">
+                                <span class="cp-info-lbl">PURPOSE:</span>
+                                <span class="cp-info-val" id="det-purpose">Renewal</span>
+                            </div>
+                            <div class="cp-info-row">
+                                <span class="cp-info-lbl">COMMENT:</span>
+                                <span class="cp-info-val" id="det-comment">None</span>
+                            </div>
+                            <div class="cp-info-row">
+                                <span class="cp-info-lbl">STATUS:</span>
+                                <span class="cp-info-val" id="det-status" style="color: #0052FF;">PENDING</span>
+                            </div>
+                        </div>
+
+                        <!-- Ticket Number Display Pane -->
+                        <div class="cp-ticket-display">
+                            <div class="cp-td-label">TICKET NUMBER</div>
+                            <div class="cp-td-number" id="det-ticket-num">R-001</div>
+                            <div class="cp-td-file" id="det-file-num">File No. R00108022026</div>
+                        </div>
+                    </div>
+
+                    <!-- Action History Log Container -->
+                    <div class="cp-history-group">
+                        <div class="cp-history-title">ACTION HISTORY</div>
+                        <div class="cp-history-list" id="det-history-list">
+                            <div class="cp-history-item">
+                                <span class="cp-history-time">14:34:02</span>
+                                <span class="cp-history-desc">Created ticket R-001 (Renewal)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons Row -->
+                    <div class="cp-action-row">
+                        <button type="button" class="cp-act-btn cp-btn-complete" id="btn-act-complete">COMPLETE</button>
+                        <button type="button" class="cp-act-btn cp-btn-transfer" id="btn-act-transfer">TRANSFER</button>
+                        <button type="button" class="cp-act-btn cp-btn-delete" id="btn-act-delete">DELETE</button>
+                    </div>
+                </div>
+
+                <!-- Right List & Search Card -->
+                <div class="cp-list-card">
+                    <input type="text" id="cp-search-input" class="cp-search-input" placeholder="FILE NUMBER/ TICKET NUMBER" aria-label="Search by File Number or Ticket Number">
+                    <div class="cp-tickets-scroll" id="cp-tickets-list">
+                        <!-- Rendered ticket items populate here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Confirmation Modal Overlay -->
+    <div class="cp-modal-overlay" id="cp-modal-overlay">
+        <div class="cp-modal-card">
+            <div class="cp-modal-icon" id="modal-icon">⚠️</div>
+            <h3 class="cp-modal-title" id="modal-title">CONFIRM ACTION</h3>
+            <div class="cp-modal-body" id="modal-body">Are you sure you want to perform this action?</div>
+            <div id="modal-extra-content"></div>
+            <div class="cp-modal-actions">
+                <button type="button" class="cp-modal-btn cp-mbtn-cancel" id="modal-btn-cancel">CANCEL</button>
+                <button type="button" class="cp-modal-btn cp-mbtn-confirm" id="modal-btn-confirm">CONFIRM</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts for Logic & Control Panel Operations -->
+    <script>
+        /* ===================================================================
+           1. CLOCK & PST TIME DISPLAY
+           =================================================================== */
+        function updateClock() {
+            try {
+                const now = new Date();
+                const dateOptions = { timeZone: 'Asia/Manila', month: 'long', day: '2-digit', year: 'numeric' };
+                const dateStr = now.toLocaleDateString('en-US', dateOptions);
+
+                const timeOptions = { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+                let timeStr = now.toLocaleTimeString('en-US', timeOptions).replace(/\s*[a-zA-Z]+/g, '');
+
+                document.getElementById('date-display').textContent = dateStr;
+                document.getElementById('time-display').textContent = timeStr;
+            } catch (e) {
+                console.error("Error updating Philippine Time:", e);
+            }
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        /* ===================================================================
+           2. DATA STORAGE ENGINE & SEED DATA INITIALIZATION
+           =================================================================== */
+        const LS_QUEUE = 'lto_ticket_queue';
+        const LS_HOLD = 'lto_onhold_queue';
+        const LS_ACC = 'lto_accomplished_queue';
+        const LS_PAUSED = 'lto_system_paused';
+
+        function getQueue() { return JSON.parse(localStorage.getItem(LS_QUEUE) || '[]'); }
+        function saveQueue(q) { localStorage.setItem(LS_QUEUE, JSON.stringify(q)); }
+
+        function getHold() { return JSON.parse(localStorage.getItem(LS_HOLD) || '[]'); }
+        function saveHold(h) { localStorage.setItem(LS_HOLD, JSON.stringify(h)); }
+
+        function getAcc() { return JSON.parse(localStorage.getItem(LS_ACC) || '[]'); }
+        function saveAcc(a) { localStorage.setItem(LS_ACC, JSON.stringify(a)); }
+
+        // Seed initial sample data if queues are completely empty
+        function initSeedDataIfEmpty() {
+            const currentQueue = getQueue();
+            const currentHold = getHold();
+            const currentAcc = getAcc();
+
+            if (currentQueue.length === 0 && currentHold.length === 0 && currentAcc.length === 0) {
+                const seedTickets = [
+                    {
+                        ticketNumber: 'R-001',
+                        fileNumber: 'R00108022026',
+                        clientName: 'Juan Dela Cruz',
+                        date: '08/02/2026',
+                        time: '14:34',
+                        type: 'Regular',
+                        purpose: 'Renewal',
+                        comment: 'None',
+                        status: 'PENDING',
+                        currentSection: 'A',
+                        createdAt: Date.now() - 3600000,
+                        history: [
+                            { time: '13:34:02', desc: 'Created ticket R-001 (Renewal)' },
+                            { time: '13:35:10', desc: 'Assigned to Window A Queue' }
+                        ]
+                    },
+                    {
+                        ticketNumber: 'M-002',
+                        fileNumber: 'M00208022026',
+                        clientName: 'Maria Santos',
+                        date: '08/02/2026',
+                        time: '14:10',
+                        type: 'Priority',
+                        purpose: 'Miscellaneous',
+                        comment: 'Senior Citizen',
+                        status: 'CALLING',
+                        currentSection: 'D_E',
+                        createdAt: Date.now() - 2400000,
+                        history: [
+                            { time: '14:10:15', desc: 'Created ticket M-002 (Misc)' },
+                            { time: '14:12:00', desc: 'Called at Window D' }
+                        ]
+                    },
+                    {
+                        ticketNumber: 'L-003',
+                        fileNumber: 'L00308022026',
+                        clientName: 'Pedro Penduko',
+                        date: '08/02/2026',
+                        time: '14:15',
+                        type: 'Regular',
+                        purpose: 'LETAS',
+                        comment: 'None',
+                        status: 'ONHOLD',
+                        currentSection: 'C_B',
+                        createdAt: Date.now() - 1800000,
+                        history: [
+                            { time: '14:15:20', desc: 'Created ticket L-003 (LETAS)' },
+                            { time: '14:20:00', desc: 'Put On Hold at Window B' }
+                        ]
+                    },
+                    {
+                        ticketNumber: 'O-004',
+                        fileNumber: 'O00408022026',
+                        clientName: 'Ana Reyes',
+                        date: '08/02/2026',
+                        time: '13:50',
+                        type: 'Regular',
+                        purpose: 'Other',
+                        comment: 'Duplicate Request',
+                        status: 'COMPLETED',
+                        currentSection: 'Cashier',
+                        createdAt: Date.now() - 5000000,
+                        history: [
+                            { time: '13:50:00', desc: 'Created ticket O-004 (Other)' },
+                            { time: '14:05:00', desc: 'Transferred to Cashier' },
+                            { time: '14:25:00', desc: 'Completed at Cashier' }
+                        ]
+                    },
+                    {
+                        ticketNumber: 'R-005',
+                        fileNumber: 'R00508022026',
+                        clientName: 'Roberto Garcia',
+                        date: '08/02/2026',
+                        time: '14:28',
+                        type: 'Regular',
+                        purpose: 'Renewal',
+                        comment: 'None',
+                        status: 'PENDING',
+                        currentSection: 'E_J',
+                        createdAt: Date.now() - 900000,
+                        history: [
+                            { time: '14:28:40', desc: 'Created ticket R-005 (Renewal)' }
+                        ]
+                    }
+                ];
+
+                saveQueue([seedTickets[0], seedTickets[1], seedTickets[4]]);
+                saveHold([seedTickets[2]]);
+                saveAcc([seedTickets[3]]);
+            }
+        }
+        initSeedDataIfEmpty();
+
+        /* Get compiled array of all tickets in the entire system */
+        function getAllSystemTickets() {
+            const q = getQueue();
+            const h = getHold();
+            const a = getAcc();
+
+            // Merge avoiding duplicate ticketNumbers if any
+            const map = new Map();
+            q.forEach(t => map.set(t.ticketNumber, { ...t, status: t.status || 'PENDING' }));
+            h.forEach(t => map.set(t.ticketNumber, { ...t, status: 'ONHOLD' }));
+            a.forEach(t => map.set(t.ticketNumber, { ...t, status: 'COMPLETED' }));
+
+            return Array.from(map.values());
+        }
+
+        /* ===================================================================
+           3. INTERACTIVE GRAPH ENGINE (Canvas API)
+           =================================================================== */
+        let currentGraphType = 'Entries'; // 'Entries' or 'On Hold'
+
+        const entriesData = [15, 14, 2, 10, 12, 4, 11, 16, 15];
+        const onHoldData = [2, 1, 0, 3, 1, 0, 2, 4, 2];
+
+        function renderGraph() {
+            const canvas = document.getElementById('cp-graph-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            // Handle retina displays
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio || 600;
+            canvas.height = rect.height * window.devicePixelRatio || 180;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+            const width = rect.width;
+            const height = rect.height;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const data = currentGraphType === 'Entries' ? entriesData : onHoldData;
+            const maxVal = Math.max(...data, 10) + 2;
+            const padding = { top: 25, right: 30, bottom: 30, left: 35 };
+
+            const graphW = width - padding.left - padding.right;
+            const graphH = height - padding.top - padding.bottom;
+
+            // Draw horizontal grid lines
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
+            ctx.lineWidth = 1;
+            const gridRows = 4;
+            for (let i = 0; i <= gridRows; i++) {
+                const y = padding.top + (graphH / gridRows) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(width - padding.right, y);
+                ctx.stroke();
+            }
+
+            // Draw X axis labels (0 to 8)
+            ctx.fillStyle = '#666666';
+            ctx.font = '11px sans-serif';
+            ctx.textAlign = 'center';
+            const stepX = graphW / (data.length - 1);
+
+            const points = [];
+            data.forEach((val, idx) => {
+                const x = padding.left + idx * stepX;
+                const y = padding.top + graphH - (val / maxVal) * graphH;
+                points.push({ x, y, val });
+
+                // X label
+                ctx.fillText(idx.toString(), x, height - 8);
+            });
+
+            // Draw Line Gradient Fill
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, points[0].y);
+            for (let i = 1; i < points.length; i++) {
+                ctx.lineTo(points[i].x, points[i].y);
+            }
+            ctx.lineTo(points[points.length - 1].x, padding.top + graphH);
+            ctx.lineTo(points[0].x, padding.top + graphH);
+            ctx.closePath();
+
+            const areaGrad = ctx.createLinearGradient(0, padding.top, 0, height - padding.bottom);
+            if (currentGraphType === 'Entries') {
+                areaGrad.addColorStop(0, 'rgba(255, 51, 51, 0.25)');
+                areaGrad.addColorStop(1, 'rgba(255, 51, 51, 0.0)');
+            } else {
+                areaGrad.addColorStop(0, 'rgba(0, 71, 255, 0.2)');
+                areaGrad.addColorStop(1, 'rgba(0, 71, 255, 0.0)');
+            }
+            ctx.fillStyle = areaGrad;
+            ctx.fill();
+
+            // Draw Connecting Line
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, points[0].y);
+            for (let i = 1; i < points.length; i++) {
+                ctx.lineTo(points[i].x, points[i].y);
+            }
+            ctx.strokeStyle = currentGraphType === 'Entries' ? '#ff3333' : '#0052FF';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+
+            // Draw Dots & Point Values
+            points.forEach(pt => {
+                ctx.beginPath();
+                ctx.arc(pt.x, pt.y, 4.5, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
+                ctx.strokeStyle = currentGraphType === 'Entries' ? '#ff3333' : '#0052FF';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            });
+        }
+
+        // Toggle Graph View
+        function setGraphType(type) {
+            currentGraphType = type;
+            document.getElementById('graph-view-title').textContent = type;
+            document.getElementById('dot-entries').classList.toggle('active', type === 'Entries');
+            document.getElementById('dot-onhold').classList.toggle('active', type === 'On Hold');
+            renderGraph();
+        }
+
+        document.getElementById('graph-toggle-btn').addEventListener('click', () => {
+            setGraphType(currentGraphType === 'Entries' ? 'On Hold' : 'Entries');
+        });
+        document.getElementById('dot-entries').addEventListener('click', () => setGraphType('Entries'));
+        document.getElementById('dot-onhold').addEventListener('click', () => setGraphType('On Hold'));
+
+        window.addEventListener('resize', renderGraph);
+        setTimeout(renderGraph, 100);
+
+        /* ===================================================================
+           4. SYSTEM PAUSE & RESET CONTROLS
+           =================================================================== */
+        function checkPauseState() {
+            const isPaused = localStorage.getItem(LS_PAUSED) === 'true';
+            const pauseBtn = document.getElementById('btn-system-pause');
+            const banner = document.getElementById('cp-pause-banner');
+
+            if (isPaused) {
+                pauseBtn.textContent = 'RESUME';
+                pauseBtn.classList.add('is-paused');
+                banner.classList.add('show');
+            } else {
+                pauseBtn.textContent = 'PAUSE';
+                pauseBtn.classList.remove('is-paused');
+                banner.classList.remove('show');
+            }
+        }
+        checkPauseState();
+
+        // Pause/Resume button handler
+        document.getElementById('btn-system-pause').addEventListener('click', () => {
+            const isPaused = localStorage.getItem(LS_PAUSED) === 'true';
+            const actionText = isPaused ? 'resume' : 'pause';
+
+            showConfirmModal({
+                icon: isPaused ? '▶️' : '⏸️',
+                title: isPaused ? 'RESUME SYSTEM' : 'PAUSE SYSTEM',
+                body: isPaused
+                    ? 'Are you sure you want to resume the system? Active ticket calling and user actions will be restored.'
+                    : 'Are you sure you want to pause the system? All active ticket calls will be suspended and user actions will be disabled across all windows.',
+                confirmText: isPaused ? 'RESUME SYSTEM' : 'PAUSE SYSTEM',
+                confirmClass: 'cp-mbtn-confirm',
+                onConfirm: () => {
+                    localStorage.setItem(LS_PAUSED, (!isPaused).toString());
+                    checkPauseState();
+                }
+            });
+        });
+
+        // Reset button handler
+        document.getElementById('btn-system-reset').addEventListener('click', () => {
+            showConfirmModal({
+                icon: '⚠️',
+                title: 'RESET SYSTEM',
+                body: 'WARNING: Are you sure you want to reset the entire system? This will clear all active queues, tickets, on-hold records, and accomplishment statistics.',
+                confirmText: 'RESET ALL DATA',
+                confirmClass: 'cp-mbtn-danger',
+                onConfirm: () => {
+                    localStorage.removeItem(LS_QUEUE);
+                    localStorage.removeItem(LS_HOLD);
+                    localStorage.removeItem(LS_ACC);
+                    localStorage.removeItem(LS_PAUSED);
+                    // Clear window calling states
+                    ['A','B','C','D','E','F','G','H','I','J','M','N','Cashier'].forEach(id => {
+                        localStorage.removeItem('lto_' + id + '_active_calling');
+                        localStorage.removeItem('lto_stats_' + id);
+                    });
+
+                    // Re-seed fresh state
+                    initSeedDataIfEmpty();
+                    checkPauseState();
+                    refreshAllData();
+                }
+            });
+        });
+
+        /* ===================================================================
+           5. TICKET LIST, SEARCH & SELECTION LOGIC
+           =================================================================== */
+        let selectedTicketNumber = null;
+
+        function refreshAllData() {
+            const tickets = getAllSystemTickets();
+
+            // 1. Calculate Metrics
+            const total = tickets.length;
+            const waiting = tickets.filter(t => t.status === 'PENDING' || t.status === 'CALLING').length;
+            const done = tickets.filter(t => t.status === 'COMPLETED').length;
+            const onhold = tickets.filter(t => t.status === 'ONHOLD').length;
+
+            document.getElementById('metric-entries').textContent = total;
+            document.getElementById('metric-waiting').textContent = waiting;
+            document.getElementById('metric-done').textContent = done;
+            document.getElementById('metric-onhold').textContent = onhold;
+
+            // 2. Render List with Filter
+            renderTicketList(tickets);
+
+            // 3. Render Detail for selected or first ticket
+            if (tickets.length > 0) {
+                const target = tickets.find(t => t.ticketNumber === selectedTicketNumber) || tickets[0];
+                selectTicket(target);
+            } else {
+                clearTicketDetail();
+            }
+
+            renderGraph();
+        }
+
+        function renderTicketList(tickets) {
+            const listEl = document.getElementById('cp-tickets-list');
+            const searchVal = (document.getElementById('cp-search-input').value || '').trim().toUpperCase();
+
+            listEl.innerHTML = '';
+
+            const filtered = tickets.filter(t => {
+                if (!searchVal) return true;
+                const tNum = (t.ticketNumber || '').toUpperCase();
+                const fNum = (t.fileNumber || '').toUpperCase();
+                return tNum.includes(searchVal) || fNum.includes(searchVal);
+            });
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = '<div style="text-align:center; color:#666; padding:20px; font-weight:bold; font-size:0.85rem;">NO MATCHING ENTRIES FOUND</div>';
+                return;
+            }
+
+            filtered.forEach(t => {
+                const item = document.createElement('div');
+                item.className = 'cp-ticket-item' + (t.ticketNumber === selectedTicketNumber ? ' active' : '');
+
+                let badgeClass = 'cp-badge-pending';
+                if (t.status === 'CALLING') badgeClass = 'cp-badge-calling';
+                if (t.status === 'ONHOLD') badgeClass = 'cp-badge-onhold';
+                if (t.status === 'COMPLETED') badgeClass = 'cp-badge-completed';
+                if (t.status === 'TRANSFERRED') badgeClass = 'cp-badge-transferred';
+
+                item.innerHTML = `
+                    <div class="cp-titem-left">
+                        <span class="cp-titem-num">${t.ticketNumber || 'N/A'}</span>
+                        <span class="cp-titem-file">${t.fileNumber || ''}</span>
+                    </div>
+                    <div class="cp-titem-right">
+                        <span class="cp-badge ${badgeClass}">${t.status || 'PENDING'}</span>
+                    </div>
+                `;
+
+                item.addEventListener('click', () => selectTicket(t));
+                listEl.appendChild(item);
+            });
+        }
+
+        // Search input filter listener
+        document.getElementById('cp-search-input').addEventListener('input', () => {
+            renderTicketList(getAllSystemTickets());
+        });
+
+        // Select ticket and update left detail panel
+        function selectTicket(t) {
+            if (!t) return;
+            selectedTicketNumber = t.ticketNumber;
+
+            document.getElementById('det-name').textContent = t.clientName || 'N/A';
+            document.getElementById('det-date').textContent = t.date || 'N/A';
+            document.getElementById('det-time').textContent = t.time || 'N/A';
+            document.getElementById('det-type').textContent = t.type || 'Regular';
+            document.getElementById('det-purpose').textContent = t.purpose || 'N/A';
+            document.getElementById('det-comment').textContent = t.comment || 'None';
+
+            const statusEl = document.getElementById('det-status');
+            statusEl.textContent = t.status || 'PENDING';
+
+            if (t.status === 'COMPLETED') statusEl.style.color = '#155724';
+            else if (t.status === 'ONHOLD') statusEl.style.color = '#856404';
+            else if (t.status === 'CALLING') statusEl.style.color = '#d60052';
+            else statusEl.style.color = '#0052FF';
+
+            document.getElementById('det-ticket-num').textContent = t.ticketNumber || '---';
+            document.getElementById('det-file-num').textContent = 'File No. ' + (t.fileNumber || 'N/A');
+
+            // Action History
+            const histList = document.getElementById('det-history-list');
+            histList.innerHTML = '';
+
+            const history = t.history || [
+                { time: t.time || '14:00', desc: `Created ticket ${t.ticketNumber}` }
+            ];
+
+            history.forEach(h => {
+                const hRow = document.createElement('div');
+                hRow.className = 'cp-history-item';
+                hRow.innerHTML = `
+                    <span class="cp-history-time">${h.time || ''}</span>
+                    <span class="cp-history-desc">${h.desc || ''}</span>
+                `;
+                histList.appendChild(hRow);
+            });
+
+            // Re-render list active state
+            document.querySelectorAll('.cp-ticket-item').forEach(el => {
+                const isSelected = el.querySelector('.cp-titem-num').textContent === t.ticketNumber;
+                el.classList.toggle('active', isSelected);
+            });
+
+            // Action buttons state
+            const isCompleted = t.status === 'COMPLETED';
+            document.getElementById('btn-act-complete').disabled = isCompleted;
+        }
+
+        function clearTicketDetail() {
+            selectedTicketNumber = null;
+            document.getElementById('det-name').textContent = '—';
+            document.getElementById('det-date').textContent = '—';
+            document.getElementById('det-time').textContent = '—';
+            document.getElementById('det-type').textContent = '—';
+            document.getElementById('det-purpose').textContent = '—';
+            document.getElementById('det-comment').textContent = '—';
+            document.getElementById('det-status').textContent = '—';
+            document.getElementById('det-ticket-num').textContent = '---';
+            document.getElementById('det-file-num').textContent = 'File No. —';
+            document.getElementById('det-history-list').innerHTML = '<div class="cp-history-item"><span class="cp-history-desc">No ticket selected</span></div>';
+        }
+
+        /* ===================================================================
+           6. TICKET MODIFICATION ACTIONS (COMPLETE, TRANSFER, DELETE)
+           =================================================================== */
+        function getSelectedTicket() {
+            if (!selectedTicketNumber) return null;
+            return getAllSystemTickets().find(t => t.ticketNumber === selectedTicketNumber);
+        }
+
+        // COMPLETE BUTTON
+        document.getElementById('btn-act-complete').addEventListener('click', () => {
+            const ticket = getSelectedTicket();
+            if (!ticket) return;
+
+            showConfirmModal({
+                icon: '✅',
+                title: 'COMPLETE TICKET',
+                body: `Are you sure you want to mark ticket ${ticket.ticketNumber} (${ticket.fileNumber}) as COMPLETED? This will bypass normal window routing.`,
+                confirmText: 'MARK AS COMPLETED',
+                confirmClass: 'cp-mbtn-confirm',
+                onConfirm: () => {
+                    const nowTime = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    const newHistory = [...(ticket.history || []), { time: nowTime, desc: 'Bypassed & Marked Completed via Control Panel' }];
+
+                    const updatedTicket = { ...ticket, status: 'COMPLETED', history: newHistory };
+
+                    // Remove from queue/hold, add to acc
+                    saveQueue(getQueue().filter(t => t.ticketNumber !== ticket.ticketNumber));
+                    saveHold(getHold().filter(t => t.ticketNumber !== ticket.ticketNumber));
+
+                    const acc = getAcc().filter(t => t.ticketNumber !== ticket.ticketNumber);
+                    acc.push(updatedTicket);
+                    saveAcc(acc);
+
+                    refreshAllData();
+                }
+            });
+        });
+
+        // TRANSFER BUTTON
+        document.getElementById('btn-act-transfer').addEventListener('click', () => {
+            const ticket = getSelectedTicket();
+            if (!ticket) return;
+
+            const extraSelectHTML = `
+                <div style="text-align:left; font-size:0.85rem; font-weight:bold; color:#333; margin-top:10px;">Select Destination Window:</div>
+                <select id="transfer-dest-select" class="cp-modal-select">
+                    <option value="A">Window A (Registration)</option>
+                    <option value="C_B">Window B / C (LETAS)</option>
+                    <option value="D_E">Window D / E (Misc)</option>
+                    <option value="E_J">Window F – J (Renewal)</option>
+                    <option value="M_N">Window M / N</option>
+                    <option value="Cashier">Cashier Counter</option>
+                </select>
+            `;
+
+            showConfirmModal({
+                icon: '🔄',
+                title: 'TRANSFER TICKET',
+                body: `Transfer ticket ${ticket.ticketNumber} (${ticket.fileNumber}) to another window counter:`,
+                extraContentHTML: extraSelectHTML,
+                confirmText: 'EXECUTE TRANSFER',
+                confirmClass: 'cp-mbtn-confirm',
+                onConfirm: () => {
+                    const dest = document.getElementById('transfer-dest-select').value;
+                    const destName = document.getElementById('transfer-dest-select').options[document.getElementById('transfer-dest-select').selectedIndex].text;
+                    const nowTime = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+                    const newHistory = [...(ticket.history || []), { time: nowTime, desc: `Transferred to ${destName}` }];
+                    const updatedTicket = { ...ticket, status: 'TRANSFERRED', currentSection: dest, history: newHistory };
+
+                    // Remove from hold/acc, ensure in main queue
+                    saveHold(getHold().filter(t => t.ticketNumber !== ticket.ticketNumber));
+                    saveAcc(getAcc().filter(t => t.ticketNumber !== ticket.ticketNumber));
+
+                    const q = getQueue().filter(t => t.ticketNumber !== ticket.ticketNumber);
+                    q.push(updatedTicket);
+                    saveQueue(q);
+
+                    refreshAllData();
+                }
+            });
+        });
+
+        // DELETE BUTTON
+        document.getElementById('btn-act-delete').addEventListener('click', () => {
+            const ticket = getSelectedTicket();
+            if (!ticket) return;
+
+            showConfirmModal({
+                icon: '🗑️',
+                title: 'DELETE TICKET',
+                body: `WARNING: Are you sure you want to permanently delete ticket ${ticket.ticketNumber} (${ticket.fileNumber}) from the active system records?`,
+                confirmText: 'PERMANENTLY DELETE',
+                confirmClass: 'cp-mbtn-danger',
+                onConfirm: () => {
+                    saveQueue(getQueue().filter(t => t.ticketNumber !== ticket.ticketNumber));
+                    saveHold(getHold().filter(t => t.ticketNumber !== ticket.ticketNumber));
+                    saveAcc(getAcc().filter(t => t.ticketNumber !== ticket.ticketNumber));
+
+                    selectedTicketNumber = null;
+                    refreshAllData();
+                }
+            });
+        });
+
+        /* ===================================================================
+           7. MODAL CONFIRMATION DIALOG ENGINE
+           =================================================================== */
+        let currentModalCallback = null;
+
+        function showConfirmModal(opts) {
+            document.getElementById('modal-icon').textContent = opts.icon || '⚠️';
+            document.getElementById('modal-title').textContent = opts.title || 'CONFIRM ACTION';
+            document.getElementById('modal-body').textContent = opts.body || '';
+
+            const extraContainer = document.getElementById('modal-extra-content');
+            extraContainer.innerHTML = opts.extraContentHTML || '';
+
+            const confirmBtn = document.getElementById('modal-btn-confirm');
+            confirmBtn.textContent = opts.confirmText || 'CONFIRM';
+            confirmBtn.className = 'cp-modal-btn ' + (opts.confirmClass || 'cp-mbtn-confirm');
+
+            currentModalCallback = opts.onConfirm || null;
+
+            document.getElementById('cp-modal-overlay').classList.add('show');
+        }
+
+        function hideConfirmModal() {
+            document.getElementById('cp-modal-overlay').classList.remove('show');
+            currentModalCallback = null;
+        }
+
+        document.getElementById('modal-btn-cancel').addEventListener('click', hideConfirmModal);
+        document.getElementById('modal-btn-confirm').addEventListener('click', () => {
+            if (currentModalCallback) currentModalCallback();
+            hideConfirmModal();
+        });
+
+        // Initial Data Refresh
+        refreshAllData();
+    </script>
+</body>
+
+</html>
