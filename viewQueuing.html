@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -764,6 +764,22 @@
 
     <!-- Queue Engine, Audio Synthesizer & Visual Loop Script -->
     <script>
+        // Skeleton: shimmer queue panels while data loads from localStorage
+        (function() {
+            const skStart = Date.now();
+            document.querySelectorAll('.vq-container-box, .now-calling-box').forEach(function(box) {
+                box.classList.add('skeleton-card');
+            });
+            setTimeout(function() {
+                document.querySelectorAll('.vq-container-box, .now-calling-box').forEach(function(box, i) {
+                    setTimeout(function() {
+                        box.classList.remove('skeleton-card');
+                        box.classList.add('card-revealed');
+                    }, i * 80);
+                });
+            }, Math.max(0, 300 - (Date.now() - skStart)));
+        })();
+
         /* ===================================================================
            1. AUDIO SYNTHESIZER & SPEECH ANNOUNCEMENT ENGINE
            =================================================================== */
@@ -989,6 +1005,11 @@
                 titleEl.textContent = formatWindowName(windowId);
                 numEl.textContent = ticketId;
                 labelEl.textContent = cat.name;
+
+                // Gold pulse on ticket number update
+                numEl.classList.remove('value-updated');
+                void numEl.offsetWidth; // force reflow to restart animation
+                numEl.classList.add('value-updated');
 
                 cardEl.className = 'cat-card ' + cat.cssClass;
                 cardEl.classList.remove('flash-green', 'flash-red', 'idle');

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -56,6 +56,18 @@
             box-shadow: 0 8px 20px rgba(230, 0, 0, .55);
         }
     </style>
+    <script>
+        // Page transition: fade-exit on any internal link click
+        document.addEventListener('click', function(e) {
+            const link = e.target.closest('a[href]');
+            if (link && !link.href.startsWith('#') && link.target !== '_blank' && !link.href.startsWith('javascript')) {
+                e.preventDefault();
+                const dest = link.href;
+                document.body.classList.add('page-exit');
+                setTimeout(function() { window.location.href = dest; }, 250);
+            }
+        });
+    </script>
 </head>
 
 <body>
@@ -81,6 +93,13 @@
             <a href="#" class="wa-header-logout" id="logout-btn">LOGOUT</a>
         </div>
     </header>
+
+    <nav class="sub-nav" aria-label="Section navigation">
+        <a href="windowList.html" class="sub-nav-item">Windows</a>
+        <span class="sub-nav-separator" aria-hidden="true">›</span>
+        <span class="sub-nav-item active" aria-current="page">Window A</span>
+    </nav>
+
 
     <!-- Main Registration Section -->
     <main class="hero" id="main-content">
@@ -251,6 +270,24 @@
 
     <!-- Scripts for Logic & Formatting -->
     <script>
+        // Skeleton loading: shimmer purpose cards on load
+        (function() {
+            const skStart = Date.now();
+            document.querySelectorAll('.purpose-card').forEach(function(card) {
+                card.classList.add('skeleton-card');
+            });
+            // Read any localStorage data needed, then reveal after min 300ms
+            const elapsed = Date.now() - skStart;
+            setTimeout(function() {
+                document.querySelectorAll('.purpose-card').forEach(function(card, i) {
+                    setTimeout(function() {
+                        card.classList.remove('skeleton-card');
+                        card.classList.add('card-revealed');
+                    }, i * 60); // 60ms stagger per card
+                });
+            }, Math.max(0, 300 - elapsed));
+        })();
+
         // Live Header Clock script (PST UTC+8 / Asia/Manila)
         function updateClock() {
             try {

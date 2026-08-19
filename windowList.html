@@ -10,6 +10,18 @@
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script>
+        // Page transition: fade-exit on any internal link click
+        document.addEventListener('click', function(e) {
+            const link = e.target.closest('a[href]');
+            if (link && !link.href.startsWith('#') && link.target !== '_blank' && !link.href.startsWith('javascript')) {
+                e.preventDefault();
+                const dest = link.href;
+                document.body.classList.add('page-exit');
+                setTimeout(function() { window.location.href = dest; }, 250);
+            }
+        });
+    </script>
 </head>
 
 <body>
@@ -32,6 +44,11 @@
             </div>
         </div>
     </header>
+
+    <nav class="sub-nav" aria-label="Section navigation">
+        <span class="sub-nav-item active" aria-current="page">Windows</span>
+    </nav>
+
 
     <!-- Hero / Windows Section -->
     <main class="hero" id="main-content">
@@ -188,7 +205,24 @@
             }
         }
 
+        // Skeleton loading: apply shimmer to all window buttons on load
+        const skeletonStart = Date.now();
+        document.querySelectorAll('.window-btn').forEach(function(btn) {
+            btn.classList.add('skeleton-card');
+        });
+
+        // Read data, then reveal cards after min 300ms
         updateBadges();
+        const elapsed = Date.now() - skeletonStart;
+        setTimeout(function() {
+            document.querySelectorAll('.window-btn').forEach(function(btn, i) {
+                setTimeout(function() {
+                    btn.classList.remove('skeleton-card');
+                    btn.classList.add('card-revealed');
+                }, i * 30); // stagger 30ms per card for cascade effect
+            });
+        }, Math.max(0, 300 - elapsed));
+
         setInterval(updateBadges, 1000);
         // Live Clock script (Philippine Standard Time UTC+8 / Asia/Manila)
         function updateClock() {

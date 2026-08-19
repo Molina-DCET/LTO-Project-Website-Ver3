@@ -973,6 +973,18 @@
             }
         }
     </style>
+    <script>
+        // Page transition: fade-exit on any internal link click
+        document.addEventListener('click', function(e) {
+            const link = e.target.closest('a[href]');
+            if (link && !link.href.startsWith('#') && link.target !== '_blank' && !link.href.startsWith('javascript')) {
+                e.preventDefault();
+                const dest = link.href;
+                document.body.classList.add('page-exit');
+                setTimeout(function() { window.location.href = dest; }, 250);
+            }
+        });
+    </script>
 </head>
 
 <body>
@@ -998,6 +1010,13 @@
             <a href="#" class="wb-header-logout" id="logout-btn">LOGOUT</a>
         </div>
     </header>
+
+    <nav class="sub-nav" aria-label="Section navigation">
+        <a href="windowList.html" class="sub-nav-item">Windows</a>
+        <span class="sub-nav-separator" aria-hidden="true">›</span>
+        <span class="sub-nav-item active" aria-current="page">Cashier</span>
+    </nav>
+
 
     <!-- ============================= MAIN ============================= -->
     <main class="hero wb-hero">

@@ -34,6 +34,68 @@
     top: 0;
 }
 
+/* ==========================================================================
+   Secondary Breadcrumb Navigation Bar (logged-in pages only)
+   ========================================================================== */
+.sub-nav {
+    height: 40px;
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    padding: 0 40px;
+    gap: 6px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.sub-nav-item {
+    color: rgba(255, 255, 255, 0.55);
+    font-family: var(--font-family);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    text-decoration: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: color 0.2s ease, background 0.2s ease;
+    white-space: nowrap;
+}
+
+.sub-nav-item:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.sub-nav-item.active {
+    color: #FFD700;
+    border-bottom: 2px solid #FFD700;
+    padding-bottom: 2px;
+}
+
+.sub-nav-separator {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 0.75rem;
+    line-height: 1;
+    user-select: none;
+}
+
+@media (max-width: 480px) {
+    .sub-nav {
+        padding: 0 16px;
+        gap: 4px;
+    }
+    .sub-nav-item {
+        font-size: 0.7rem;
+        padding: 3px 6px;
+    }
+}
+
 /* Global Reset */
 * {
     margin: 0;
@@ -635,7 +697,7 @@ body {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
     cursor: pointer;
     text-decoration: none;
-    transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.25s ease;
+    transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.15s ease;
     z-index: 1;
 }
 
@@ -678,8 +740,8 @@ body {
 }
 
 .window-btn:hover {
-    transform: scale(1.06);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+    transform: scale(1.08);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 82, 255, 0.25);
 }
 
 .window-btn:hover::before {
@@ -1201,7 +1263,7 @@ body {
     color: #ffffff;
     font-size: 0.8rem;
     font-weight: 900;
-    transition: color 0.3s ease;
+    transition: color 0.3s ease, letter-spacing 0.2s ease;
     letter-spacing: 0.5px;
     text-shadow: 0 1px 2px rgba(255, 255, 255, 0.4);
 }
@@ -1209,6 +1271,7 @@ body {
 .purpose-card:hover .card-title,
 .purpose-card.selected .card-title {
     color: #ffffff;
+    letter-spacing: 1.2px;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
@@ -1656,4 +1719,107 @@ body {
         flex-direction: column;
         gap: 12px;
     }
+}
+
+/* ==========================================================================
+   Page Transition Animations
+   ========================================================================== */
+@keyframes pageEnter {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pageExit {
+    to {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+}
+
+body {
+    animation: pageEnter 0.25s ease forwards;
+}
+
+body.page-exit {
+    animation: pageExit 0.25s ease forwards;
+    pointer-events: none;
+}
+
+/* ==========================================================================
+   Skeleton Loading System
+   ========================================================================== */
+@keyframes shimmer {
+    from { background-position: 200% 0; }
+    to   { background-position: -200% 0; }
+}
+
+.skeleton-card {
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.05) 25%,
+        rgba(255, 255, 255, 0.14) 50%,
+        rgba(255, 255, 255, 0.05) 75%
+    ) !important;
+    background-size: 200% 100% !important;
+    animation: shimmer 1.5s infinite !important;
+    color: transparent !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: none !important;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* Suppress children visibility during skeleton state */
+.skeleton-card * {
+    visibility: hidden;
+}
+
+/* Card reveal animation once data is ready */
+@keyframes cardReveal {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card-revealed {
+    animation: cardReveal 0.3s ease forwards;
+}
+
+/* Skeleton shimmer for inline data spans (queue numbers, ticket IDs) */
+.skeleton-inline {
+    display: inline-block;
+    width: 4ch;
+    height: 1em;
+    border-radius: 4px;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.06) 25%,
+        rgba(255, 255, 255, 0.16) 50%,
+        rgba(255, 255, 255, 0.06) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    vertical-align: middle;
+}
+
+/* Now-serving panel highlight pulse when value updates */
+@keyframes valuePulse {
+    0%   { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.6); }
+    50%  { box-shadow: 0 0 0 8px rgba(255, 215, 0, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+}
+
+.value-updated {
+    animation: valuePulse 0.6s ease forwards;
 }
