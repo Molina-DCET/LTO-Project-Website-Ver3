@@ -1110,7 +1110,7 @@
                 } else {
                     filtered.forEach(t => {
                         const tr = document.createElement('tr');
-                        const targetWin = t.heldByWindow || t.calledBy || formatWindowName(t.currentSection || 'Window B');
+                        const targetWin = t.heldByWindow || t.currentWindow || t.calledBy || formatWindowName(t.currentSection || 'Window B');
                         tr.innerHTML = `<td>${t.id}</td><td>${targetWin}</td>`;
                         bodyEl.appendChild(tr);
                     });
