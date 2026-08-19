@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+
 /* CSS stylesheet for LTO Queuing System Homepage */
 
 /* Define font face and color variables */
@@ -9,7 +11,27 @@
     --bg-overlay: rgba(0, 46, 161, 0.75);
     --button-bg: rgba(0, 20, 100, 0.45);
     --button-bg-hover: rgba(0, 20, 100, 0.65);
-    --font-family: "Bookman Old Style", "Bookman", "Georgia", "Times New Roman", serif;
+    --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Skip Navigation Link (accessibility) */
+.skip-nav {
+    position: absolute;
+    top: -100%;
+    left: 0;
+    background: #FFD700;
+    color: #000000;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 14px 24px;
+    text-decoration: none;
+    z-index: 99999;
+    border-radius: 0 0 8px 0;
+    transition: top 0.15s ease;
+}
+.skip-nav:focus {
+    top: 0;
 }
 
 /* Global Reset */
@@ -17,6 +39,13 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+/* Global keyboard focus indicator (WCAG 2.1 AA) */
+:focus-visible {
+    outline: 3px solid #FFD700;
+    outline-offset: 3px;
+    border-radius: 4px;
 }
 
 body {
@@ -136,7 +165,8 @@ body {
     flex-grow: 1;
     min-height: calc(100vh - 100px);
     background: linear-gradient(var(--bg-overlay), var(--bg-overlay)), url('img/background.png') no-repeat center center/cover;
-    background-attachment: fixed;
+    background-attachment: scroll;
+    will-change: transform;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -224,6 +254,44 @@ body {
     text-align: center;
 }
 
+/* Hero Live Queue Stats Bar */
+.hero-stats-bar {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    z-index: 2;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.stat-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 16px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 120px;
+    transition: background 0.2s ease;
+}
+.stat-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
 /* Responsiveness and Media Queries */
 @media (max-width: 1024px) {
     .header {
@@ -282,34 +350,55 @@ body {
 }
 
 @media (max-width: 480px) {
-    .header-title {
-        font-size: 1rem;
+    /* Compact header — hide text, keep logo + action button */
+    .header {
+        height: 56px;
+        padding: 0 16px;
     }
-
+    .header-title,
     .header-subtitle {
-        font-size: 0.75rem;
+        display: none;
     }
-
-    .header-right {
-        flex-direction: column;
+    .time-container {
+        display: none;
+    }
+    .header-left {
         gap: 10px;
     }
-
-    .time-text {
-        font-size: 1.5rem;
+    .header-logo {
+        height: 44px;
     }
-
+    .header-right {
+        width: auto;
+        flex-direction: row;
+        gap: 0;
+    }
     .admin-btn {
         padding: 8px 24px;
         font-size: 1rem;
-        width: 100%;
-        max-width: 200px;
         text-align: center;
     }
-
     .hero-content {
         gap: 30px;
     }
+
+    /* Touch target minimum sizes (WCAG 2.5.5) */
+    .view-queuing-btn,
+    .admin-btn,
+    .window-btn,
+    .logout-btn,
+    .login-btn,
+    .generate-btn,
+    .print-btn,
+    .toggle-password-btn {
+        min-height: 48px;
+        min-width: 48px;
+    }
+
+    /* Stats bar compact */
+    .hero-stats-bar { gap: 10px; }
+    .stat-card { padding: 12px 16px; min-width: 90px; }
+    .stat-value { font-size: 1.4rem; }
 }
 
 /* ==========================================================================
@@ -408,6 +497,35 @@ body {
     transform: translateY(-50%) scale(1.08);
 }
 
+/* Password toggle button wrapper (accessible replacement for img-as-button) */
+.toggle-password-btn {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    min-width: 36px;
+    min-height: 36px;
+}
+.toggle-password-btn .toggle-password-icon {
+    width: 28px;
+    height: auto;
+    object-fit: contain;
+    opacity: 0.8;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.toggle-password-btn:hover .toggle-password-icon {
+    opacity: 1;
+    transform: scale(1.08);
+}
+
 /* Glass Texture Login Button */
 .login-btn {
     width: 100%;
@@ -471,6 +589,24 @@ body {
         border-radius: 16px;
         font-size: 1.1rem;
     }
+}
+
+/* Inline login error message */
+#login-error {
+    color: #ff6b6b;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-align: center;
+    margin-top: -8px;
+    padding: 8px 12px;
+    background: rgba(255, 107, 107, 0.1);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    border-radius: 8px;
+    animation: fadeInError 0.2s ease;
+}
+@keyframes fadeInError {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ==========================================================================
@@ -650,6 +786,8 @@ body {
     transform: translateY(25px);
     transition: opacity 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     border-left: 6px solid #0052FF;
+    position: relative;
+    overflow: hidden;
 }
 
 .toast.show {
@@ -665,6 +803,23 @@ body {
 .toast-logout {
     border-left-color: var(--border-red);
     /* Alert Red */
+}
+
+/* Toast auto-dismiss progress bar */
+.toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 0 0 14px 14px;
+    transform-origin: left;
+    animation: toastProgress 1.5s linear forwards;
+}
+@keyframes toastProgress {
+    from { transform: scaleX(1); }
+    to   { transform: scaleX(0); }
 }
 
 /* Grid Responsiveness */
