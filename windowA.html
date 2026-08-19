@@ -551,6 +551,10 @@
             }
 
             // === Save ticket object to shared localStorage queue ===
+            let routeDesc = 'Section B/C (LETAS)';
+            if (initialSection === 'D_E') routeDesc = 'Section D/E (Misc)';
+            else if (initialSection === 'E_J') routeDesc = 'Section E-J (Renewal/Other)';
+
             const ticketObj = {
                 id: ticketNum,
                 name: document.getElementById('ticket-info-name').textContent,
@@ -561,6 +565,16 @@
                 comment: document.getElementById('ticket-info-comment').textContent || '',
                 status: 'pending',
                 currentSection: initialSection,
+                currentWindow: 'Window A (Registration)',
+                currentRoute: routeDesc,
+                history: [
+                    {
+                        time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                        action: 'CREATED',
+                        window: 'Window A (Registration)',
+                        desc: 'Created at Window A (Registration). Initial Route: ' + routeDesc
+                    }
+                ],
                 printedAt: Date.now()
             };
             const queue = JSON.parse(localStorage.getItem('lto_ticket_queue') || '[]');
