@@ -334,6 +334,14 @@
                                 <span class="cp-info-val" id="det-comment">—</span>
                             </div>
                             <div class="cp-info-row">
+                                <span class="cp-info-lbl">CURRENT WINDOW:</span>
+                                <span class="cp-info-val" id="det-current-window" style="font-weight:700; color:#0052FF;">—</span>
+                            </div>
+                            <div class="cp-info-row">
+                                <span class="cp-info-lbl">ROUTE FLOW:</span>
+                                <span class="cp-info-val" id="det-current-route" style="font-weight:600; color:#555;">—</span>
+                            </div>
+                            <div class="cp-info-row">
                                 <span class="cp-info-lbl">STATUS:</span>
                                 <span class="cp-info-val" id="det-status">—</span>
                             </div>
@@ -935,6 +943,9 @@
             document.getElementById('det-ticket-num').textContent = t.id || '---';
             document.getElementById('det-file-num').textContent = 'File No. ' + fileNo(t.id);
 
+            document.getElementById('det-current-window').textContent = t.currentWindow || getCurrentWindowLabel(t);
+            document.getElementById('det-current-route').textContent = t.currentRoute || (t.purpose ? t.purpose + ' Route' : 'Standard Route');
+
             // History
             var histList = document.getElementById('det-history-list');
             histList.innerHTML = '';
@@ -945,7 +956,10 @@
                 history.forEach(function(h) {
                     var hRow = document.createElement('div');
                     hRow.className = 'cp-history-item';
-                    hRow.innerHTML = '<span class="cp-history-time">' + (h.time || '') + '</span><span class="cp-history-desc">' + (h.desc || '') + '</span>';
+                    var act = (h.action || '').toUpperCase();
+                    var actClass = act ? 'cp-act-' + act.toLowerCase() : 'cp-act-info';
+                    var actBadge = act ? '<span class="cp-action-tag ' + actClass + '">' + act + '</span>' : '';
+                    hRow.innerHTML = '<span class="cp-history-time">' + (h.time || '') + '</span>' + actBadge + '<span class="cp-history-desc">' + (h.desc || '') + '</span>';
                     histList.appendChild(hRow);
                 });
             }
@@ -970,6 +984,8 @@
             document.getElementById('det-type').textContent = '—';
             document.getElementById('det-purpose').textContent = '—';
             document.getElementById('det-comment').textContent = '—';
+            document.getElementById('det-current-window').textContent = '—';
+            document.getElementById('det-current-route').textContent = '—';
             document.getElementById('det-status').textContent = '—';
             document.getElementById('det-ticket-num').textContent = '---';
             document.getElementById('det-file-num').textContent = 'File No. —';
@@ -1048,9 +1064,14 @@
             return new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
         }
 
-        function addHistoryEntry(ticket, desc) {
+        function addHistoryEntry(ticket, desc, action) {
             if (!ticket.history) ticket.history = [];
-            ticket.history.push({ time: getNowTimeStr(), desc: desc });
+            ticket.history.push({
+                time: getNowTimeStr(),
+                action: action || 'INFO',
+                window: 'Control Panel',
+                desc: desc
+            });
         }
 
         // Determine which window a ticket is currently at
@@ -1077,7 +1098,8 @@
                 confirmText: 'MARK AS COMPLETED',
                 confirmClass: 'cp-mbtn-confirm',
                 onConfirm: function() {
-                    addHistoryEntry(ticket, 'Bypassed & Marked Completed via Control Panel');
+                    addHistoryEntry(ticket, 'Bypassed & Marked Completed via Control Panel', 'COMPLETED');
+                    ticket.currentWindow = 'Control Panel (Completed)';
                     ticket.status = 'accomplished';
                     ticket.accomplishedAt = Date.now();
 
@@ -1157,8 +1179,9 @@
                     var destSection = sel.value;
                     var destLabel = sel.options[sel.selectedIndex].getAttribute('data-label');
 
-                    addHistoryEntry(ticket, 'Transferred from ' + currentLabel + ' to ' + destLabel + ' via Control Panel');
+                    addHistoryEntry(ticket, 'Transferred from ' + currentLabel + ' to ' + destLabel + ' via Control Panel', 'TRANSFERRED');
                     ticket.currentSection = destSection;
+                    ticket.currentWindow = 'Queue for ' + destLabel;
                     ticket.status = 'pending';
 
                     // Remove from hold

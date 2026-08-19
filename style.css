@@ -2244,6 +2244,29 @@ body.page-exit {
     font-weight: 600;
 }
 
+.cp-action-tag {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: 800;
+    border-radius: 4px;
+    margin: 0 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.cp-act-created { background: #e3f2fd; color: #0d47a1; }
+.cp-act-called { background: #fce4ec; color: #c2185b; }
+.cp-act-recalled { background: #f3e5f5; color: #7b1fa2; }
+.cp-act-cancel_call { background: #fff3e0; color: #e65100; }
+.cp-act-on_hold { background: #fff8e1; color: #b78103; }
+.cp-act-restored { background: #e8f5e9; color: #2e7d32; }
+.cp-act-prioritized { background: #e0f2f1; color: #004d40; }
+.cp-act-advanced { background: #e0f7fa; color: #00838f; }
+.cp-act-completed { background: #d4edda; color: #155724; }
+.cp-act-transferred { background: #fff3cd; color: #856404; }
+.cp-act-deleted { background: #f8d7da; color: #721c24; }
+.cp-act-info { background: #e9ecef; color: #495057; }
+
 /* Detail Action Buttons Row */
 .cp-action-row {
     display: grid;
