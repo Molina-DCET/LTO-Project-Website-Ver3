@@ -6,8 +6,12 @@
     <title>LTO Cabuyao District Office - Queuing System</title>
     <meta name="description" content="Land Transportation Office Cabuyao District Office Queuing System Homepage">
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
+
+    <a class="skip-nav" href="#main-content">Skip to main content</a>
 
     <!-- Header Section -->
     <header class="header">
@@ -28,13 +32,32 @@
     </header>
 
     <!-- Hero Section -->
-    <main class="hero">
+    <main class="hero" id="main-content">
         <!-- Faint Watermark Logo in Background -->
         <img src="img/logo.png" alt="LTO Logo Watermark" class="hero-watermark">
         
         <div class="hero-content">
             <h1 class="hero-title">QUEUING SYSTEM</h1>
-            
+
+            <!-- Live Queue Statistics Bar -->
+            <div class="hero-stats-bar" aria-label="Live queue statistics">
+                <div class="stat-card">
+                    <span class="stat-label">Now Serving</span>
+                    <span class="stat-value" id="stat-now-serving"
+                          aria-live="polite" aria-atomic="true">—</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">In Queue</span>
+                    <span class="stat-value" id="stat-in-queue"
+                          aria-live="polite" aria-atomic="true">—</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Avg. Wait</span>
+                    <span class="stat-value" id="stat-avg-wait"
+                          aria-live="polite" aria-atomic="true">—</span>
+                </div>
+            </div>
+
             <!-- Link to viewQueuing.html which is standard for the project -->
             <a href="viewQueuing.html" class="view-queuing-btn" id="view-queuing-button">
                 <img src="img/people logo.png" alt="People Icon" class="people-icon">
@@ -86,6 +109,43 @@
         updateClock();
         // Update every 1 second (1000 milliseconds)
         setInterval(updateClock, 1000);
+
+        // Live Queue Stats Bar
+        function updateStats() {
+            try {
+                const queue = JSON.parse(localStorage.getItem('lto_ticket_queue') || '[]');
+
+                const nowServingEl = document.getElementById('stat-now-serving');
+                const inQueueEl = document.getElementById('stat-in-queue');
+                const avgWaitEl = document.getElementById('stat-avg-wait');
+
+                // "Now Serving" — most recently called ticket (has calledAt timestamp)
+                const calledTickets = queue.filter(t => t.calledAt);
+                if (calledTickets.length > 0) {
+                    calledTickets.sort((a, b) => (b.calledAt || 0) - (a.calledAt || 0));
+                    nowServingEl.textContent = calledTickets[0].ticketNumber || '—';
+                } else {
+                    nowServingEl.textContent = queue.length > 0 ? 'N/A' : '—';
+                }
+
+                // "In Queue" — tickets not yet completed
+                const waiting = queue.filter(t => !t.completedAt && t.status !== 'done' && t.status !== 'completed');
+                inQueueEl.textContent = String(waiting.length);
+
+                // "Avg. Wait" — 3 minutes per person estimate
+                if (waiting.length > 0) {
+                    const est = waiting.length * 3;
+                    avgWaitEl.textContent = est < 60 ? est + ' min' : Math.round(est / 60) + ' hr';
+                } else {
+                    avgWaitEl.textContent = queue.length > 0 ? '< 1 min' : '—';
+                }
+            } catch (e) {
+                console.error('Error updating stats:', e);
+            }
+        }
+
+        updateStats();
+        setInterval(updateStats, 2000);
     </script>
 </body>
 </html>

@@ -6,8 +6,12 @@
     <title>LTO Cabuyao District Office - Admin Login</title>
     <meta name="description" content="Land Transportation Office Cabuyao District Office Queuing System Admin Login">
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
+
+    <a class="skip-nav" href="#main-content">Skip to main content</a>
 
     <!-- Header Section -->
     <header class="header">
@@ -28,7 +32,7 @@
     </header>
 
     <!-- Hero / Login Section -->
-    <main class="hero">
+    <main class="hero" id="main-content">
         <!-- Faint Watermark Logo in Background -->
         <img src="img/logo.png" alt="LTO Logo Watermark" class="hero-watermark">
         
@@ -47,7 +51,11 @@
                 <div class="input-group">
                     <input type="password" id="password" placeholder=" " required autocomplete="current-password">
                     <label for="password">PASSWORD</label>
-                    <img src="img/eye.png" alt="Toggle Password Visibility" class="toggle-password" id="toggle-password-icon">
+                    <button type="button" class="toggle-password-btn" id="toggle-password-btn"
+                            aria-label="Show password" aria-pressed="false">
+                        <img src="img/eye.png" alt="" aria-hidden="true" class="toggle-password-icon"
+                             id="toggle-password-icon">
+                    </button>
                 </div>
                 
                 <!-- Login Button with Glass Texture -->
@@ -98,48 +106,86 @@
 
         // Show/Hide Password Script
         const passwordInput = document.getElementById('password');
+        const toggleBtn = document.getElementById('toggle-password-btn');
         const toggleIcon = document.getElementById('toggle-password-icon');
 
-        toggleIcon.addEventListener('click', function() {
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleIcon.src = 'img/eye-off-sharp.png';
-                toggleIcon.alt = 'Hide Password';
-            } else {
-                passwordInput.type = 'password';
-                toggleIcon.src = 'img/eye.png';
-                toggleIcon.alt = 'Show Password';
-            }
+        toggleBtn.addEventListener('click', function() {
+            const isShowing = passwordInput.type === 'text';
+            passwordInput.type = isShowing ? 'password' : 'text';
+            toggleIcon.src = isShowing ? 'img/eye.png' : 'img/eye-off-sharp.png';
+            toggleBtn.setAttribute('aria-label', isShowing ? 'Show password' : 'Hide password');
+            toggleBtn.setAttribute('aria-pressed', String(!isShowing));
         });
 
         // Form Submit & Toast Notification Script
         const loginForm = document.getElementById('login-form');
         loginForm.addEventListener('submit', function(event) {
             event.preventDefault();
-            showToast("Login Successful! Redirecting...", "login", function() {
-                window.location.href = 'windowList.html';
-            });
+
+            const btn = loginForm.querySelector('.login-btn');
+            const usernameVal = document.getElementById('username').value.trim();
+            const passwordVal = document.getElementById('password').value;
+
+            // Set loading state
+            btn.disabled = true;
+            btn.textContent = 'LOGGING IN…';
+            btn.setAttribute('aria-busy', 'true');
+
+            setTimeout(function() {
+                const isValid = (usernameVal === 'admin' && passwordVal === 'admin');
+
+                if (!isValid) {
+                    // Restore button
+                    btn.disabled = false;
+                    btn.textContent = 'LOGIN';
+                    btn.removeAttribute('aria-busy');
+
+                    // Show inline error
+                    let errEl = document.getElementById('login-error');
+                    if (!errEl) {
+                        errEl = document.createElement('p');
+                        errEl.id = 'login-error';
+                        errEl.setAttribute('role', 'alert');
+                        loginForm.insertBefore(errEl, btn);
+                    }
+                    errEl.textContent = 'Invalid username or password. Please try again.';
+
+                    // Clear and focus password
+                    const passField = document.getElementById('password');
+                    passField.value = '';
+                    passField.focus();
+                    return;
+                }
+
+                // Success
+                const existingErr = document.getElementById('login-error');
+                if (existingErr) existingErr.remove();
+
+                showToast('Login Successful! Redirecting…', 'login', function() {
+                    window.location.href = 'windowList.html';
+                });
+            }, 400);
         });
 
         function showToast(message, type, callback) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
-            toast.innerHTML = `<span>${message}</span>`;
+            toast.innerHTML = `<span>${message}</span><div class="toast-progress"></div>`;
             container.appendChild(toast);
-            
+
             // Trigger animation
             setTimeout(() => {
                 toast.classList.add('show');
             }, 50);
-            
+
             // Hide and execute callback
             setTimeout(() => {
                 toast.classList.remove('show');
                 setTimeout(() => {
                     toast.remove();
                     if (callback) callback();
-                }, 300);
+                }, 350);
             }, 1500);
         }
     </script>
