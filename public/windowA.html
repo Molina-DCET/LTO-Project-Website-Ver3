@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LTO Cabuyao District Office - Registration (Window A)</title>
+    <meta name="description"
+        content="Land Transportation Office Cabuyao District Office Registration Queue Ticket Generator">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="js/api.js" defer></script>
+    <script src="js/windowA.js" defer></script>
+</head>
+
+<body>
+
+
+    <a class="skip-nav" href="#main-content">Skip to main content</a>
+
+    <!-- Header Section -->
+    <header class="header">
+        <div class="header-left">
+            <img src="assets/img/logo.png" alt="LTO Logo" class="header-logo">
+            <div class="header-title-container">
+                <span class="header-title">LAND TRANSPORTATION OFFICE</span>
+                <span class="header-subtitle">CABUYAO DISTRICT OFFICE</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="time-container">
+                <span class="date-text" id="date-display">August 02, 2026</span>
+                <span class="time-text" id="time-display">14:34:33</span>
+            </div>
+            <a href="windowList.html" class="wa-header-winlist" id="winlist-btn">WINDOW LIST</a>
+            <a href="#" class="wa-header-logout" id="logout-btn">LOGOUT</a>
+        </div>
+    </header>
+
+    <nav class="sub-nav" aria-label="Section navigation">
+        <a href="windowList.html" class="sub-nav-item">Windows</a>
+        <span class="sub-nav-separator" aria-hidden="true">›</span>
+        <span class="sub-nav-item active" aria-current="page">Window A</span>
+    </nav>
+
+
+    <!-- Main Registration Section -->
+    <main class="hero" id="main-content">
+        <!-- Faint Watermark Logo in Background -->
+        <img src="assets/img/logo.png" alt="LTO Logo Watermark" class="hero-watermark">
+
+        <h1 class="hero-title registration-title">REGISTRATION</h1>
+
+        <div class="registration-container">
+            <!-- Left Pane: Input and Selections -->
+            <div class="registration-left">
+                <form id="registration-form" onsubmit="event.preventDefault();">
+                    <!-- Name Input & Priority Toggle Row -->
+                    <div class="registration-inputs-row">
+                        <div class="input-border-group">
+                            <input type="text" id="name-input" placeholder=" " autocomplete="off">
+                            <label for="name-input">NAME(OPTIONAL)</label>
+                        </div>
+
+                        <div class="priority-toggle-container">
+                            <div class="toggle-switch" id="priority-toggle">
+                                <div class="toggle-slider"></div>
+                            </div>
+                            <span class="priority-label">PRIORITY</span>
+                        </div>
+                    </div>
+
+                    <!-- Purpose Selection Cards -->
+                    <div class="purpose-cards-grid">
+                        <!-- Renewal Card (Green theme) -->
+                        <div class="purpose-card card-renewal" id="card-renewal" onclick="selectPurpose('renewal')">
+                            <span class="card-title">RENEWAL</span>
+                            <div class="logo-container">
+                                <img src="assets/img/refresh-circle.png" alt="Renewal Icon" class="card-logo">
+                            </div>
+                        </div>
+
+                        <!-- Miscellaneous Card (Yellow theme) -->
+                        <div class="purpose-card card-misc" id="card-misc" onclick="selectPurpose('misc')">
+                            <span class="card-title">MISCELLANEOUS</span>
+                            <div class="logo-container">
+                                <img src="assets/img/car-sport.png" alt="Misc Icon" class="card-logo">
+                            </div>
+                        </div>
+
+                        <!-- Letas Card (White theme) -->
+                        <div class="purpose-card card-letas" id="card-letas" onclick="selectPurpose('letas')">
+                            <span class="card-title">LETAS</span>
+                            <div class="logo-container">
+                                <img src="assets/img/alert-circle.png" alt="Letas Icon" class="card-logo">
+                            </div>
+                        </div>
+
+                        <!-- Other Card (Blue theme) -->
+                        <div class="purpose-card card-other" id="card-other" onclick="selectPurpose('other')">
+                            <span class="card-title">OTHER</span>
+                            <div class="logo-container">
+                                <img src="assets/img/Settings.png" alt="Other Icon" class="card-logo">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comment Input with Importance Toggle Circle -->
+                    <div class="comment-group">
+                        <div class="input-border-group comment-textarea-group">
+                            <textarea id="comment-input" placeholder=" " autocomplete="off" rows="3"></textarea>
+                            <label for="comment-input">COMMENT</label>
+                            <div class="comment-important-circle" id="important-circle" title="Mark as Important"
+                                onclick="toggleCommentImportant()"></div>
+                        </div>
+                    </div>
+
+                    <!-- Glass Texture Buttons Row -->
+                    <div class="registration-buttons-row">
+                        <button type="button" class="generate-btn" id="generate-button" disabled
+                            onclick="generateTicket()">GENERATE</button>
+                        <button type="button" class="print-btn" id="print-button" style="display: none;"
+                            onclick="printTicket()">
+                            <span class="print-btn-text">PRINT</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right Pane: Ticket Live Preview -->
+            <div class="registration-right">
+                <span class="preview-header">PREVIEW</span>
+
+                <div class="preview-box">
+                    <!-- Default Placeholder when no preview exists -->
+                    <div class="no-preview" id="no-preview-placeholder">
+                        <span>NO PREVIEW</span>
+                    </div>
+
+                    <!-- Thermal Ticket Paper Preview Card -->
+                    <div class="ticket-paper" id="ticket-paper" style="display: none;">
+                        <div class="ticket-header">
+                            <img src="assets/img/logo.png" alt="LTO Logo" class="ticket-logo">
+                            <div class="ticket-lto-title">LAND TRANSPORTATION OFFICE</div>
+                            <div class="ticket-lto-subtitle">CABUYAO DISTRICT OFFICE</div>
+                        </div>
+
+                        <div class="ticket-divider"></div>
+
+                        <div class="ticket-section-title">TICKET NUMBER</div>
+
+                        <!-- Boxed Ticket Number -->
+                        <div class="ticket-number-box" id="ticket-num-box">
+                            <div class="ticket-box-header" id="ticket-box-type">PRIORITY</div>
+                            <div class="ticket-box-number" id="ticket-box-num">P-001</div>
+                            <div class="ticket-box-color" id="ticket-box-color-label">COLOR: PINK</div>
+                        </div>
+
+                        <!-- Transaction Info (Hidden on printed slip, retained in DOM for system metadata) -->
+                        <div class="ticket-transaction-info" style="display: none;">
+                            <div class="ticket-section-title">TRANSACTION INFO</div>
+                            <div class="ticket-info-grid">
+                                <div class="info-row">
+                                    <span class="info-label">NAME:</span>
+                                    <span class="info-val" id="ticket-info-name">Unknown</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">DATE:</span>
+                                    <span class="info-val" id="ticket-info-date">08/02/2026</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">TIME:</span>
+                                    <span class="info-val" id="ticket-info-time">14:34</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">TYPE:</span>
+                                    <span class="info-val" id="ticket-info-type">Priority</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">PURPOSE:</span>
+                                    <span class="info-val" id="ticket-info-purpose">Renewal</span>
+                                </div>
+                                <!-- Optional dynamic comment row -->
+                                <div class="info-row" id="ticket-info-comment-row" style="display: none;">
+                                    <span class="info-label">COMMENT:</span>
+                                    <span class="info-val" id="ticket-info-comment">None</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Barcode Value Area (Plain Text Display) -->
+                        <div class="ticket-barcode-text" id="ticket-barcode-text"></div>
+
+                        <div class="ticket-disclaimer-box">
+                            Please take your seat and wait for your<br>number appear on the screen
+                        </div>
+
+                        <!-- Thermal ticket footer address information -->
+                        <div class="ticket-footer-address">
+                            154 Areza Town Center, Brgy. Canlalay, Biñan, Laguna.
+                        </div>
+                        <div class="ticket-footer-contact">
+                            Contact Number: +63 222146466 | +63 953643536 | +63 474918939
+                        </div>
+                        <div class="ticket-footer-email">
+                            Office email address: 0420ltocabuyaodo@gmail.com.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts for Logic & Formatting -->
+    
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toast-container"></div>
+</body>
+
+</html>

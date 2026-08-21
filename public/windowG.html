@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LTO Cabuyao District Office - Window G</title>
+    <meta name="description" content="Land Transportation Office Cabuyao District Office Window G Operator Dashboard">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="js/api.js" defer></script>
+    <script src="js/windowG.js" defer></script>
+</head>
+
+<body>
+
+
+    <a class="skip-nav" href="#main-content">Skip to main content</a>
+
+    <!-- ============================= HEADER ============================= -->
+    <header class="header">
+        <div class="header-left">
+            <img src="assets/img/logo.png" alt="LTO Logo" class="header-logo">
+            <div class="header-title-container">
+                <span class="header-title">LAND TRANSPORTATION OFFICE</span>
+                <span class="header-subtitle">CABUYAO DISTRICT OFFICE</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="time-container">
+                <span class="date-text" id="date-display">August 09, 2026</span>
+                <span class="time-text" id="time-display">14:34:33</span>
+            </div>
+            <a href="windowList.html" class="wb-header-winlist" id="winlist-btn">WINDOW LIST</a>
+            <a href="#" class="wb-header-logout" id="logout-btn">LOGOUT</a>
+        </div>
+    </header>
+
+    <nav class="sub-nav" aria-label="Section navigation">
+        <a href="windowList.html" class="sub-nav-item">Windows</a>
+        <span class="sub-nav-separator" aria-hidden="true">�</span>
+        <span class="sub-nav-item active" aria-current="page">Window G</span>
+    </nav>
+
+
+    <!-- ============================= MAIN ============================= -->
+    <main class="hero wb-hero">
+        <img src="assets/img/logo.png" alt="LTO Watermark" class="hero-watermark">
+
+        <h1 class="wb-title">WINDOW G</h1>
+
+        <div class="wb-grid">
+
+            <!-- =========================================================
+             1. CALLING SECTION
+             ========================================================= -->
+            <div class="wb-card">
+                <div class="wb-card-header">NOW CALLING</div>
+                <div class="wb-calling-body">
+                    <!-- Transaction Info -->
+                    <div class="wb-txn-pane">
+                        <div class="wb-txn-section-label">Transaction Info</div>
+                        <div class="wb-txn-row"><span class="wb-txn-lbl">File Number:</span> <span class="wb-txn-val"
+                                id="txn-file">&#8212;</span></div>
+                        <div class="wb-txn-row"><span class="wb-txn-lbl">Name:</span><span class="wb-txn-val"
+                                id="txn-name">&#8212;</span></div>
+                        <div class="wb-txn-row"><span class="wb-txn-lbl">Date:</span><span class="wb-txn-val"
+                                id="txn-date">&#8212;</span></div>
+                        <div class="wb-txn-row"><span class="wb-txn-lbl">Time:</span><span class="wb-txn-val"
+                                id="txn-time">&#8212;</span></div>
+                        <div class="wb-txn-row"><span class="wb-txn-lbl">Type:</span><span class="wb-txn-val"
+                                id="txn-type">&#8212;</span></div>
+                        <div class="wb-txn-row"><span class="wb-txn-lbl">Purpose:</span><span class="wb-txn-val"
+                                id="txn-purpose">&#8212;</span></div>
+                        <div class="wb-txn-row"><span class="wb-txn-lbl">Comment:</span><span class="wb-txn-val"
+                                id="txn-comment">&#8212;</span></div>
+                    </div>
+
+                    <!-- Big Ticket Number -->
+                    <div class="wb-num-pane">
+                        <div class="wb-num-label">Ticket Number</div>
+                        <div class="wb-num-big wb-empty" id="calling-num">NONE</div>
+                        <div class="wb-file-no" id="calling-file"></div>
+                        <div class="wb-timer" id="calling-timer">00:00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =========================================================
+             RIGHT SIDEBAR: Pending / On-Hold List
+             ========================================================= -->
+            <div class="wb-list-section">
+                <div class="wb-list-top-bar">
+                    <div class="wb-list-header-row">
+                        <span class="wb-list-header-txt" id="list-tab-title">ON HOLD</span>
+                        <span style="font-size:.78rem;font-weight:900;color:#555;" id="list-count-txt">| 0</span>
+                        <button class="wb-list-arrow-btn" onclick="advanceListPage()" title="Next page">&#8594;</button>
+                    </div>
+                    <div class="wb-list-tabs">
+                        <button class="wb-list-tab active" id="tab-pending"
+                            onclick="switchTab('pending')">Pendings</button>
+                        <button class="wb-list-tab" id="tab-onhold" onclick="switchTab('onhold')">On Hold</button>
+                    </div>
+                </div>
+
+                <div class="wb-list-col-heads">
+                    <span>Ticket No</span>
+                    <span>Purpose</span>
+                </div>
+
+                <div class="wb-list-body" id="list-body">
+                    <div class="wb-list-empty">No items yet</div>
+                </div>
+
+                <div class="wb-list-dots-row" id="list-dots-row"></div>
+
+                <!-- Lower Search Field for Ticket / File Number -->
+                <div class="wb-list-search-box">
+                    <input type="text" id="list-search-input" placeholder="Search Ticket or File No..."
+                        autocomplete="off">
+                </div>
+            </div>
+
+            <!-- =========================================================
+             2. ACTION BUTTONS
+             ========================================================= -->
+            <div class="wb-btns-grid">
+                <button class="wb-btn wb-btn-next" id="btn-next" onclick="callNext()">&#9654; CALL NEXT</button>
+                <button class="wb-btn wb-btn-again" id="btn-again" onclick="callAgain()" disabled>&#9654; CALL
+                    AGAIN</button>
+                <button class="wb-btn wb-btn-cancel" id="btn-cancel" onclick="cancelCall()" disabled>&#10006;
+                    CANCEL</button>
+                <button class="wb-btn wb-btn-hold" id="btn-hold" onclick="putOnHold()" disabled>&#9646;&#9646; PUT ON
+                    HOLD</button>
+            </div>
+
+            <!-- =========================================================
+             3. STATISTICS
+             ========================================================= -->
+            <div class="wb-card">
+                <div class="wb-stats-inner">
+                    <div class="wb-stats-header-row">
+                        <span class="wb-stats-title-txt" id="stats-title-txt">STATISTICS | Entries</span>
+                        <button class="wb-stats-arrow-btn" onclick="toggleStatsSlide()"
+                            title="Toggle chart">&#8594;</button>
+                    </div>
+
+                    <!-- Summary numbers -->
+                    <div class="wb-stats-nums">
+                        <div class="wb-stat-pill entries-box">
+                            <span class="wb-stat-pill-label">Total Entries</span>
+                            <span class="wb-stat-pill-val entries-color" id="stat-entries-num">0</span>
+                        </div>
+                        <div class="wb-stat-pill acc-box">
+                            <span class="wb-stat-pill-label">Accomplished</span>
+                            <span class="wb-stat-pill-val accomplished-color" id="stat-acc-num">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Chart carousel -->
+                    <div class="wb-stats-slides">
+                        <!-- Entries chart -->
+                        <div class="wb-stats-slide active" id="slide-0">
+                            <svg class="wb-chart-svg" viewBox="0 0 500 128" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="wbGradE" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#e60028" stop-opacity=".6" />
+                                        <stop offset="100%" stop-color="#e60028" stop-opacity="0" />
+                                    </linearGradient>
+                                </defs>
+                                <!-- Grid -->
+                                <line x1="35" y1="8" x2="494" y2="8" class="wbc-grid" />
+                                <line x1="35" y1="36" x2="494" y2="36" class="wbc-grid" />
+                                <line x1="35" y1="64" x2="494" y2="64" class="wbc-grid" />
+                                <line x1="35" y1="92" x2="494" y2="92" class="wbc-grid" />
+                                <line x1="35" y1="118" x2="494" y2="118" class="wbc-grid" />
+                                <!-- Y labels --> <!-- Dynamic -->
+                                <path id="e-area" class="wbc-area-e" d="" />
+                                <polyline id="e-line" class="wbc-line-e" points="" />
+                                <g id="e-dots"></g>
+                                <g id="e-xlbl"></g>
+                            </svg>
+                        </div>
+                        <!-- Accomplished chart -->
+                        <div class="wb-stats-slide" id="slide-1">
+                            <svg class="wb-chart-svg" viewBox="0 0 500 128" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="wbGradA" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#0052ff" stop-opacity=".6" />
+                                        <stop offset="100%" stop-color="#0052ff" stop-opacity="0" />
+                                    </linearGradient>
+                                </defs>
+                                <line x1="35" y1="8" x2="494" y2="8" class="wbc-grid" />
+                                <line x1="35" y1="36" x2="494" y2="36" class="wbc-grid" />
+                                <line x1="35" y1="64" x2="494" y2="64" class="wbc-grid" />
+                                <line x1="35" y1="92" x2="494" y2="92" class="wbc-grid" />
+                                <line x1="35" y1="118" x2="494" y2="118" class="wbc-grid" />
+                                <path id="a-area" class="wbc-area-a" d="" />
+                                <polyline id="a-line" class="wbc-line-a" points="" />
+                                <g id="a-dots"></g>
+                                <g id="a-xlbl"></g>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="wb-dots">
+                        <div class="wb-dot active" id="sdot-0" onclick="setStatsSlide(0)"></div>
+                        <div class="wb-dot" id="sdot-1" onclick="setStatsSlide(1)"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /.wb-grid -->
+    </main>
+
+    <!-- ============================= MODAL ============================= -->
+    <div class="wb-overlay" id="wb-overlay" onclick="overlayClick(event)">
+        <div class="wb-modal" id="wb-modal">
+            <div class="wb-modal-ctx" id="m-ctx">Pending Ticket</div>
+            <div class="wb-modal-num" id="m-num">R-001</div>
+            <div class="wb-modal-details">
+                <div class="wb-modal-drow"><span class="wb-modal-dlbl">File No</span> <span class="wb-modal-dval"
+                        id="m-file">&#8212;</span></div>
+                <div class="wb-modal-drow"><span class="wb-modal-dlbl">Name</span> <span class="wb-modal-dval"
+                        id="m-name">&#8212;</span></div>
+                <div class="wb-modal-drow"><span class="wb-modal-dlbl">Date</span> <span class="wb-modal-dval"
+                        id="m-date">&#8212;</span></div>
+                <div class="wb-modal-drow"><span class="wb-modal-dlbl">Time</span> <span class="wb-modal-dval"
+                        id="m-time">&#8212;</span></div>
+                <div class="wb-modal-drow"><span class="wb-modal-dlbl">Type</span> <span class="wb-modal-dval"
+                        id="m-type">&#8212;</span></div>
+                <div class="wb-modal-drow"><span class="wb-modal-dlbl">Purpose</span> <span class="wb-modal-dval"
+                        id="m-purpose">&#8212;</span></div>
+                <div class="wb-modal-drow"><span class="wb-modal-dlbl">Comment</span> <span class="wb-modal-dval"
+                        id="m-comment">&#8212;</span></div>
+            </div>
+            <div class="wb-modal-actions" id="m-actions"></div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- ============================= SCRIPTS ============================= -->
+    
+</body>
+
+</html>

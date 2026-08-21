@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LTO Cabuyao - View Queuing System</title>
+    <meta name="description" content="Land Transportation Office Cabuyao District Office View Queuing Display">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    </head>
+
+<body class="view-queuing-body">
+
+    <!-- Header Section -->
+    <header class="vq-header">
+        <div class="header-left">
+            <img src="assets/img/logo.png" alt="LTO Logo" class="header-logo">
+            <div class="header-title-container">
+                <span class="header-title">LAND TRANSPORTATION OFFICE</span>
+                <span class="header-subtitle">CABUYAO DISTRICT OFFICE</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="time-container">
+                <span class="date-text" id="date-display">August 02, 2026</span>
+                <span class="time-text" id="time-display">14:34</span>
+            </div>
+            <a href="index.html" class="home-btn" id="home-button">HOME</a>
+        </div>
+    </header>
+
+    <!-- Audio Unmute Prompt Banner (for Browser Autoplay Security) -->
+    <div class="audio-banner" id="audio-banner" onclick="enableAudioContext()">
+        <span>🔊 Click anywhere on this banner or page to enable Voice & Sound Announcements</span>
+    </div>
+
+    <!-- Main View Queuing Display Area -->
+    <main class="vq-main">
+        <!-- Faint LTO Logo Watermark in Background -->
+        <img src="assets/img/logo.png" alt="LTO Logo Watermark" class="vq-watermark">
+
+        <!-- Left Column: Cashier & Other Windows Calling -->
+        <div class="vq-left-col">
+
+            <!-- Cashier Calling Box -->
+            <div class="vq-container-box">
+                <div class="vq-box-title">WINDOW K/L(Cashier)</div>
+                <div class="cashier-grid">
+
+                    <!-- Renewal Container -->
+                    <div class="cat-card cat-renewal idle" id="cashier-card-renewal">
+                        <div class="ticket-num" id="cashier-num-renewal">---</div>
+                        <div class="cat-label">RENEWAL</div>
+                    </div>
+
+                    <!-- Miscellaneous Container -->
+                    <div class="cat-card cat-misc idle" id="cashier-card-misc">
+                        <div class="ticket-num" id="cashier-num-misc">---</div>
+                        <div class="cat-label">MISCELLANEOUS</div>
+                    </div>
+
+                    <!-- LETAS Container -->
+                    <div class="cat-card cat-letas idle" id="cashier-card-letas">
+                        <div class="ticket-num" id="cashier-num-letas">---</div>
+                        <div class="cat-label">LETAS</div>
+                    </div>
+
+                    <!-- Priority Container -->
+                    <div class="cat-card cat-priority idle" id="cashier-card-priority">
+                        <div class="ticket-num" id="cashier-num-priority">---</div>
+                        <div class="cat-label">PRIORITY</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Other Windows Calling Box -->
+            <div class="vq-container-box">
+                <div class="now-calling-box">
+
+                    <div class="now-calling-info">
+                        <div class="nc-badge">NOW CALLING PLEASE GO TO</div>
+                        <div class="nc-window-name" id="nc-window-title">WINDOW ?</div>
+                    </div>
+
+                    <div class="nc-card-wrap">
+                        <div class="cat-card cat-renewal idle" id="nc-cat-card">
+                            <div class="ticket-num" id="nc-ticket-num">---</div>
+                            <div class="cat-label" id="nc-cat-label">STANDBY</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: 2 On-Hold Panels (Auto Rotates every 10 seconds) -->
+        <div class="vq-right-col">
+
+            <!-- On-Hold Panel 1 -->
+            <div class="hold-panel" id="hold-panel-1">
+                <div class="hold-panel-header">
+                    <div class="hold-main-title">ON HOLDS</div>
+                    <div class="hold-cat-subtitle cat-renewal" id="hold-cat-1">RENEWAL</div>
+                </div>
+                <table class="hold-table">
+                    <thead>
+                        <tr>
+                            <th>TICKET NO</th>
+                            <th>GO TO</th>
+                        </tr>
+                    </thead>
+                    <tbody id="hold-body-1">
+                        <tr>
+                            <td colspan="2" class="hold-empty-row">No tickets on hold</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- On-Hold Panel 2 -->
+            <div class="hold-panel" id="hold-panel-2">
+                <div class="hold-panel-header">
+                    <div class="hold-main-title">ON HOLDS</div>
+                    <div class="hold-cat-subtitle cat-misc" id="hold-cat-2">MISCELLANEOUS</div>
+                </div>
+                <table class="hold-table">
+                    <thead>
+                        <tr>
+                            <th>TICKET NO</th>
+                            <th>GO TO</th>
+                        </tr>
+                    </thead>
+                    <tbody id="hold-body-2">
+                        <tr>
+                            <td colspan="2" class="hold-empty-row">No tickets on hold</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Floating Interactive Test Control Bar -->
+    <div class="test-panel" id="test-panel">
+        <div class="test-panel-header" onclick="toggleTestPanel()">
+            <span>🧪 Demo & Call Test Tools</span>
+            <span id="test-panel-icon">▼</span>
+        </div>
+        <div class="test-panel-body">
+            <div class="test-btn-group">
+                <button class="test-btn" onclick="testCall('cashier', 'R-015', 'renewal', false)">Call Cashier
+                    R-015</button>
+                <button class="test-btn" onclick="testCall('windowD', 'R-021', 'renewal', false)">Call Window D
+                    R-021</button>
+            </div>
+            <div class="test-btn-group">
+                <button class="test-btn amber" onclick="testCall('cashier', 'R-015', 'renewal', true)">Call Again
+                    Cashier</button>
+                <button class="test-btn amber" onclick="testCall('windowD', 'R-021', 'renewal', true)">Call Again Window
+                    D</button>
+            </div>
+            <div class="test-btn-group">
+                <button class="test-btn" onclick="testCall('windowB', 'M-002', 'miscellaneous', false)">Call Window B
+                    M-002</button>
+                <button class="test-btn" onclick="testCall('windowC', 'P-001', 'priority', false)">Call Window C
+                    P-001</button>
+            </div>
+            <div class="test-btn-group">
+                <button class="test-btn danger" onclick="clearActiveCall('cashier')">Clear Cashier Call</button>
+                <button class="test-btn danger"
+                    onclick="clearActiveCall('windowD'); clearActiveCall('windowB'); clearActiveCall('windowC');">Clear
+                    Window Calls</button>
+            </div>
+            <button class="test-btn danger" onclick="seedSampleHoldData()">Populate Sample On-Hold Data</button>
+        </div>
+    </div>
+
+    <!-- Live Clock Script -->
+    <script src="js/api.js" defer></script>
+    <script src="js/viewQueuing.js" defer></script>
+
+    <!-- Queue Engine, Audio Synthesizer & Visual Loop Script -->
+    
+</body>
+
+</html>

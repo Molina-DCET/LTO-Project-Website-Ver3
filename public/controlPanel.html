@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LTO Cabuyao District Office - Control Panel</title>
+    <meta name="description" content="Land Transportation Office Cabuyao District Office System Control Panel">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="js/api.js" defer></script>
+    <script src="js/controlPanel.js" defer></script>
+</head>
+
+<body>
+
+    <a class="skip-nav" href="#main-content">Skip to main content</a>
+
+    <!-- Header Section -->
+    <header class="header">
+        <div class="header-left">
+            <img src="assets/img/logo.png" alt="LTO Logo" class="header-logo">
+            <div class="header-title-container">
+                <h1 class="header-title">LAND TRANSPORTATION OFFICE</h1>
+                <p class="header-subtitle">CABUYAO DISTRICT OFFICE</p>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <div class="time-container">
+                <span class="date-text" id="date-display">Loading...</span>
+                <span class="time-text" id="time-display">--:--:--</span>
+            </div>
+            <a href="windowList.html" class="admin-btn">WINDOW LIST</a>
+            <a href="login.html" class="logout-btn-header" id="header-logout-btn" style="background: linear-gradient(180deg, #ff1a1a 0%, #b30000 100%); padding: 8px 24px; border-radius: 20px; color: #fff; font-weight: 900; text-decoration: none; font-size: 0.95rem; border: 1.5px solid rgba(255,255,255,0.4); text-transform: uppercase;">LOGOUT</a>
+        </div>
+    </header>
+
+    <!-- Sub Navigation Breadcrumbs -->
+    <nav class="sub-nav" aria-label="Section navigation">
+        <a href="windowList.html" class="sub-nav-item">Windows</a>
+        <span class="sub-nav-separator" aria-hidden="true">›</span>
+        <span class="sub-nav-item active" aria-current="page">Control Panel</span>
+    </nav>
+
+    <!-- System Paused Overlay Banner -->
+    <div class="cp-pause-banner" id="cp-pause-banner">
+        <span>⏸ SYSTEM PAUSED — All active ticket calling and user actions are currently suspended.</span>
+    </div>
+
+    <!-- Main Control Panel Hero Layout -->
+    <main class="hero cp-hero" id="main-content">
+        <!-- Faint Watermark Logo in Background -->
+        <img src="assets/img/logo.png" alt="LTO Logo Watermark" class="hero-watermark">
+
+        <div class="cp-container">
+            <!-- Header Row: Title & Window Selector & Subtitle -->
+            <div class="cp-header-row">
+                <h1 class="cp-main-title">CONTROL PANEL</h1>
+                <div style="display:flex; align-items:center; gap:14px;">
+                    <select id="cp-window-select" class="cp-window-select" aria-label="Select window for statistics">
+                        <option value="Overall" selected>Overall</option>
+                        <option value="windowB">B</option>
+                        <option value="windowC">C</option>
+                        <option value="windowE">E</option>
+                        <option value="windowF">F</option>
+                        <option value="windowG">G</option>
+                        <option value="windowH">H</option>
+                        <option value="windowI">I</option>
+                        <option value="windowJ">J</option>
+                        <option value="cashier">Cashier</option>
+                        <option value="windowM">M</option>
+                        <option value="windowN">L</option>
+                    </select>
+                    <div class="cp-sub-title" id="cp-sub-title">OVERALL | STATISTICS</div>
+                </div>
+            </div>
+
+            <!-- Top Section: Status Metrics Stack + Interactive Graph Card -->
+            <div class="cp-top-grid">
+                <!-- Status Information Metrics Stack -->
+                <div class="cp-metrics-stack">
+                    <div class="cp-metric-item">
+                        <span class="cp-metric-num" id="metric-entries">0</span>
+                        <span class="cp-metric-label">ENTRIES</span>
+                    </div>
+                    <div class="cp-metric-item">
+                        <span class="cp-metric-num" id="metric-waiting">0</span>
+                        <span class="cp-metric-label">WAITING</span>
+                    </div>
+                    <div class="cp-metric-item">
+                        <span class="cp-metric-num" id="metric-done">0</span>
+                        <span class="cp-metric-label">DONE</span>
+                    </div>
+                    <div class="cp-metric-item">
+                        <span class="cp-metric-num" id="metric-onhold">0</span>
+                        <span class="cp-metric-label">ONHOLD</span>
+                    </div>
+                </div>
+
+                <!-- Interactive SVG Graph Card (Window B Style) -->
+                <div class="cp-graph-card">
+                    <div class="cp-graph-header">
+                        <span class="cp-graph-title" id="cp-graph-title">STATISTICS | Entries</span>
+                        <button type="button" class="cp-graph-toggle-btn" id="graph-toggle-btn"
+                            title="Switch Graph View" aria-label="Switch Graph View">→</button>
+                    </div>
+
+                    <!-- Chart Slides (Entries / On Hold) -->
+                    <div class="cp-chart-slides">
+                        <!-- Entries Chart -->
+                        <div class="cp-chart-slide active" id="cp-slide-0">
+                            <svg class="cp-chart-svg" viewBox="0 0 500 128" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="cpGradE" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#e60028" stop-opacity=".6" />
+                                        <stop offset="100%" stop-color="#e60028" stop-opacity="0" />
+                                    </linearGradient>
+                                </defs>
+                                <line x1="35" y1="8" x2="494" y2="8" class="cpc-grid" />
+                                <line x1="35" y1="36" x2="494" y2="36" class="cpc-grid" />
+                                <line x1="35" y1="64" x2="494" y2="64" class="cpc-grid" />
+                                <line x1="35" y1="92" x2="494" y2="92" class="cpc-grid" />
+                                <line x1="35" y1="118" x2="494" y2="118" class="cpc-grid" />
+                                <path id="cp-e-area" class="cpc-area-e" d="" />
+                                <polyline id="cp-e-line" class="cpc-line-e" points="" />
+                                <g id="cp-e-dots"></g>
+                                <g id="cp-e-xlbl"></g>
+                            </svg>
+                            <div class="cp-no-data" id="cp-nodata-entries" style="display:none;">No entry data available</div>
+                        </div>
+                        <!-- On Hold Chart -->
+                        <div class="cp-chart-slide" id="cp-slide-1">
+                            <svg class="cp-chart-svg" viewBox="0 0 500 128" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="cpGradA" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#0052ff" stop-opacity=".6" />
+                                        <stop offset="100%" stop-color="#0052ff" stop-opacity="0" />
+                                    </linearGradient>
+                                </defs>
+                                <line x1="35" y1="8" x2="494" y2="8" class="cpc-grid" />
+                                <line x1="35" y1="36" x2="494" y2="36" class="cpc-grid" />
+                                <line x1="35" y1="64" x2="494" y2="64" class="cpc-grid" />
+                                <line x1="35" y1="92" x2="494" y2="92" class="cpc-grid" />
+                                <line x1="35" y1="118" x2="494" y2="118" class="cpc-grid" />
+                                <path id="cp-a-area" class="cpc-area-a" d="" />
+                                <polyline id="cp-a-line" class="cpc-line-a" points="" />
+                                <g id="cp-a-dots"></g>
+                                <g id="cp-a-xlbl"></g>
+                            </svg>
+                            <div class="cp-no-data" id="cp-nodata-onhold" style="display:none;">No on-hold data available</div>
+                        </div>
+                    </div>
+
+                    <!-- Dot Indicators -->
+                    <div class="cp-graph-dots">
+                        <span class="cp-dot dot-entries active" id="cp-sdot-0" title="Show Entries Graph"></span>
+                        <span class="cp-dot dot-onhold" id="cp-sdot-1" title="Show On Hold Graph"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Modification Controls: RESET & PAUSE/RESUME -->
+            <div class="cp-controls-row">
+                <button type="button" class="cp-ctrl-btn cp-btn-reset" id="btn-system-reset">RESET</button>
+                <button type="button" class="cp-ctrl-btn cp-btn-pause" id="btn-system-pause">PAUSE</button>
+            </div>
+
+            <!-- Section Header: TICKET ENTRIES -->
+            <h2 class="cp-section-header">TICKET ENTRIES</h2>
+
+            <!-- Bottom Section: Selected Ticket Detail + Ticket Search List Grid -->
+            <div class="cp-entries-grid">
+                <!-- Left Detail Card -->
+                <div class="cp-detail-card" id="cp-detail-card">
+                    <div class="cp-detail-top">
+                        <!-- Transaction Info Pane -->
+                        <div class="cp-info-group">
+                            <div class="cp-info-title">TRANSACTION INFO</div>
+                            <div class="cp-info-row">
+                                <span class="cp-info-lbl">NAME:</span>
+                                <span class="cp-info-val" id="det-name">—</span>
+                            </div>
+                            <div class="cp-info-row">
+                                <span class="cp-info-lbl">DATE:</span>
+                                <span class="cp-info-val" id="det-date">—</span>
+                            </div>
+                            <div class="cp-info-row">
+                                <span class="cp-info-lbl">TIME:</span>
+                                <span class="cp-info-val" id="det-time">—</span>
+                            </div>
+                            <div class="cp-info-row">
+                                <span class="cp-info-lbl">TYPE:</span>
+                                <span class="cp-info-val" id="det-type">—</span>
+                            </div>
+                            <div class="cp-info-row">
+                                <span class="cp-info-lbl">PURPOSE:</span>
+                                <span class="cp-info-val" id="det-purpose">—</span>
+                            </div>
+                            <div class="cp-info-row">
+                                <span class="cp-info-lbl">COMMENT:</span>
+                                <span class="cp-info-val" id="det-comment">—</span>
+                            </div>
+                            <div class="cp-info-row">
+                                <span class="cp-info-lbl">CURRENT WINDOW:</span>
+                                <span class="cp-info-val" id="det-current-window" style="font-weight:700; color:#0052FF;">—</span>
+                            </div>
+                            <div class="cp-info-row">
+                                <span class="cp-info-lbl">ROUTE FLOW:</span>
+                                <span class="cp-info-val" id="det-current-route" style="font-weight:600; color:#555;">—</span>
+                            </div>
+                            <div class="cp-info-row">
+                                <span class="cp-info-lbl">STATUS:</span>
+                                <span class="cp-info-val" id="det-status">—</span>
+                            </div>
+                        </div>
+
+                        <!-- Ticket Number Display Pane -->
+                        <div class="cp-ticket-display">
+                            <div class="cp-td-label">TICKET NUMBER</div>
+                            <div class="cp-td-number" id="det-ticket-num">---</div>
+                            <div class="cp-td-file" id="det-file-num">File No. —</div>
+                        </div>
+                    </div>
+
+                    <!-- Action History Log Container -->
+                    <div class="cp-history-group">
+                        <div class="cp-history-title">ACTION HISTORY</div>
+                        <div class="cp-history-list" id="det-history-list">
+                            <div class="cp-history-item">
+                                <span class="cp-history-desc">No ticket selected</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons Row -->
+                    <div class="cp-action-row">
+                        <button type="button" class="cp-act-btn cp-btn-complete" id="btn-act-complete" disabled>COMPLETE</button>
+                        <button type="button" class="cp-act-btn cp-btn-transfer" id="btn-act-transfer" disabled>TRANSFER</button>
+                        <button type="button" class="cp-act-btn cp-btn-delete" id="btn-act-delete" disabled>DELETE</button>
+                    </div>
+                </div>
+
+                <!-- Right List & Search Card -->
+                <div class="cp-list-card">
+                    <input type="text" id="cp-search-input" class="cp-search-input"
+                        placeholder="FILE NUMBER/ TICKET NUMBER"
+                        aria-label="Search by File Number or Ticket Number">
+                    <div class="cp-tickets-scroll" id="cp-tickets-list">
+                        <!-- Rendered ticket items populate here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Confirmation Modal Overlay -->
+    <div class="cp-modal-overlay" id="cp-modal-overlay">
+        <div class="cp-modal-card">
+            <div class="cp-modal-icon" id="modal-icon">⚠️</div>
+            <h3 class="cp-modal-title" id="modal-title">CONFIRM ACTION</h3>
+            <div class="cp-modal-body" id="modal-body">Are you sure you want to perform this action?</div>
+            <div id="modal-extra-content"></div>
+            <div class="cp-modal-actions">
+                <button type="button" class="cp-modal-btn cp-mbtn-cancel" id="modal-btn-cancel">CANCEL</button>
+                <button type="button" class="cp-modal-btn cp-mbtn-confirm" id="modal-btn-confirm">CONFIRM</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" style="position:fixed;bottom:20px;right:20px;z-index:99999;display:flex;flex-direction:column-reverse;gap:10px;"></div>
+
+    <!-- Scripts for Logic & Control Panel Operations -->
+    
+</body>
+
+</html>

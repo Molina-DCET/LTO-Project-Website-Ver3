@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LTO Cabuyao District Office - Windows</title>
+    <meta name="description"
+        content="Land Transportation Office Cabuyao District Office Queuing System Window Selection">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="js/api.js" defer></script>
+    <script src="js/windowList.js" defer></script>
+</head>
+
+<body>
+
+    <a class="skip-nav" href="#main-content">Skip to main content</a>
+
+    <!-- Header Section -->
+    <header class="header">
+        <div class="header-left">
+            <img src="assets/img/logo.png" alt="LTO Logo" class="header-logo">
+            <div class="header-title-container">
+                <span class="header-title">LAND TRANSPORTATION OFFICE</span>
+                <span class="header-subtitle">CABUYAO DISTRICT OFFICE</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="time-container">
+                <span class="date-text" id="date-display">August 02, 2026</span>
+                <span class="time-text" id="time-display">14:34</span>
+            </div>
+        </div>
+    </header>
+
+    <nav class="sub-nav" aria-label="Section navigation">
+        <span class="sub-nav-item active" aria-current="page">Windows</span>
+    </nav>
+
+
+    <!-- Hero / Windows Section -->
+    <main class="hero" id="main-content">
+        <!-- Faint Watermark Logo in Background -->
+        <img src="assets/img/logo.png" alt="LTO Logo Watermark" class="hero-watermark">
+
+        <div class="hero-content">
+            <h1 class="hero-title">WINDOWS</h1>
+
+            <!-- Grid containing 15 buttons -->
+            <div class="windows-grid">
+                <!-- Row 1: A to E -->
+                <a href="windowA.html" class="window-btn btn-window">
+                    <span class="window-btn-text">A</span>
+                </a>
+                <a href="windowB.html" class="window-btn btn-window">
+                    <span class="window-btn-text">B</span>
+                    <span class="window-badge" id="badge-windowB" role="status" aria-live="polite" aria-label="Queue count for Window B">0</span>
+                </a>
+                <a href="windowC.html" class="window-btn btn-window">
+                    <span class="window-btn-text">C</span>
+                    <span class="window-badge" id="badge-windowC" role="status" aria-live="polite" aria-label="Queue count for Window C">0</span>
+                </a>
+                <a href="windowD.html" class="window-btn btn-window">
+                    <span class="window-btn-text">D</span>
+                    <span class="window-badge" id="badge-windowD" role="status" aria-live="polite" aria-label="Queue count for Window D">0</span>
+                </a>
+                <a href="windowE.html" class="window-btn btn-window">
+                    <span class="window-btn-text">E</span>
+                    <span class="window-badge" id="badge-windowE" role="status" aria-live="polite" aria-label="Queue count for Window E">0</span>
+                </a>
+
+                <!-- Row 2: F to J -->
+                <a href="windowF.html" class="window-btn btn-window">
+                    <span class="window-btn-text">F</span>
+                    <span class="window-badge" id="badge-windowF" role="status" aria-live="polite" aria-label="Queue count for Window F">0</span>
+                </a>
+                <a href="windowG.html" class="window-btn btn-window">
+                    <span class="window-btn-text">G</span>
+                    <span class="window-badge" id="badge-windowG" role="status" aria-live="polite" aria-label="Queue count for Window G">0</span>
+                </a>
+                <a href="windowH.html" class="window-btn btn-window">
+                    <span class="window-btn-text">H</span>
+                    <span class="window-badge" id="badge-windowH" role="status" aria-live="polite" aria-label="Queue count for Window H">0</span>
+                </a>
+                <a href="windowI.html" class="window-btn btn-window">
+                    <span class="window-btn-text">I</span>
+                    <span class="window-badge" id="badge-windowI" role="status" aria-live="polite" aria-label="Queue count for Window I">0</span>
+                </a>
+                <a href="windowJ.html" class="window-btn btn-window">
+                    <span class="window-btn-text">J</span>
+                    <span class="window-badge" id="badge-windowJ" role="status" aria-live="polite" aria-label="Queue count for Window J">0</span>
+                </a>
+
+                <!-- Row 3: M, N, Cashier, Control Panel -->
+                <a href="windowM.html" class="window-btn btn-window">
+                    <span class="window-btn-text">M</span>
+                    <span class="window-badge" id="badge-windowM" role="status" aria-live="polite" aria-label="Queue count for Window M">0</span>
+                </a>
+                <a href="windowN.html" class="window-btn btn-window">
+                    <span class="window-btn-text">N</span>
+                    <span class="window-badge" id="badge-windowN" role="status" aria-live="polite" aria-label="Queue count for Window N">0</span>
+                </a>
+                <a href="cashier.html" class="window-btn btn-cashier btn-text-long">
+                    <span class="window-btn-text">CASHIER</span>
+                    <span class="window-badge" id="badge-cashier" role="status" aria-live="polite" aria-label="Queue count for Cashier">0</span>
+                </a>
+                <a href="controlPanel.html" class="window-btn btn-control-panel btn-text-long">
+                    <span class="window-btn-text">CONTROL<br>PANEL</span>
+                </a>
+            </div>
+
+            <!-- Logout Button with Glass Texture -->
+            <a href="#" class="logout-btn" id="logout-button">LOG OUT</a>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toast-container"></div>
+</body>
+
+</html>
