@@ -605,12 +605,22 @@
         function checkPauseState() {
             var isPaused = localStorage.getItem(LS_PAUSED) === 'true';
             var pauseBtn = document.getElementById('btn-system-pause');
+            var offlineBtn = document.getElementById('btn-system-offline');
             var banner = document.getElementById('cp-pause-banner');
-            pauseBtn.textContent = isPaused ? 'RESUME' : 'PAUSE';
-            pauseBtn.classList.toggle('is-paused', isPaused);
-            banner.classList.toggle('show', isPaused);
+            if (pauseBtn) {
+                pauseBtn.textContent = isPaused ? 'RESUME' : 'PAUSE';
+                pauseBtn.classList.toggle('is-paused', isPaused);
+            }
+            if (offlineBtn) {
+                offlineBtn.textContent = isPaused ? 'ONLINE' : 'OFFLINE';
+                offlineBtn.classList.toggle('is-offline', isPaused);
+            }
+            if (banner) {
+                banner.classList.toggle('show', isPaused);
+            }
         }
         checkPauseState();
+        window.addEventListener('storage', checkPauseState);
 
         document.getElementById('btn-system-pause').addEventListener('click', function() {
             var isPaused = localStorage.getItem(LS_PAUSED) === 'true';
@@ -621,10 +631,11 @@
                     ? 'Resume the system? Active ticket calling and user actions will be restored.'
                     : 'Pause the system? All active ticket calls will be suspended and actions disabled across all windows.',
                 confirmText: isPaused ? 'RESUME SYSTEM' : 'PAUSE SYSTEM',
-                confirmClass: 'cp-mbtn-confirm',
+                confirmClass: isPaused ? 'cp-mbtn-confirm' : 'cp-mbtn-danger',
                 onConfirm: function() {
                     localStorage.setItem(LS_PAUSED, (!isPaused).toString());
                     checkPauseState();
+                    window.dispatchEvent(new Event('storage'));
                 }
             });
         });
@@ -648,10 +659,29 @@
                         localStorage.removeItem('lto_stats_' + id);
                     });
                     checkPauseState();
+                    window.dispatchEvent(new Event('storage'));
                     selectedTicketId = null;
                     clearTicketDetail();
                     refreshAllData();
                     showToast('System reset complete. All data cleared.', 'login');
+                }
+            });
+        });
+
+        document.getElementById('btn-system-offline').addEventListener('click', function() {
+            var isPaused = localStorage.getItem(LS_PAUSED) === 'true';
+            showConfirmModal({
+                icon: isPaused ? '▶️' : '⏸️',
+                title: isPaused ? 'ONLINE SYSTEM' : 'OFFLINE SYSTEM',
+                body: isPaused
+                    ? 'Online the system? Active ticket calling and user actions will be restored.'
+                    : 'Offline the system? All active ticket calls will be suspended and actions disabled across all windows.',
+                confirmText: isPaused ? 'ONLINE SYSTEM' : 'OFFLINE SYSTEM',
+                confirmClass: isPaused ? 'cp-mbtn-confirm' : 'cp-mbtn-danger',
+                onConfirm: function() {
+                    localStorage.setItem(LS_PAUSED, (!isPaused).toString());
+                    checkPauseState();
+                    window.dispatchEvent(new Event('storage'));
                 }
             });
         });

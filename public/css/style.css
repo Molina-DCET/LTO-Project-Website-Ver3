@@ -2048,7 +2048,16 @@ body.page-exit {
     background: linear-gradient(180deg, #ff9900 0%, #d66000 100%);
 }
 
+.cp-btn-offline {
+    background: linear-gradient(180deg, #0044ff 0%, #09008d 100%);
+}
+
 .cp-btn-pause.is-paused {
+    background: linear-gradient(180deg, #00cc44 0%, #00802b 100%);
+    animation: pausePulse 1.5s infinite alternate;
+}
+
+.cp-btn-offline.is-offline {
     background: linear-gradient(180deg, #00cc44 0%, #00802b 100%);
     animation: pausePulse 1.5s infinite alternate;
 }
@@ -2056,6 +2065,96 @@ body.page-exit {
 @keyframes pausePulse {
     from { box-shadow: 0 0 10px rgba(0, 204, 68, 0.4); }
     to { box-shadow: 0 0 25px rgba(0, 204, 68, 0.9); }
+}
+
+/* View Queuing System Offline Overlay */
+.vq-offline-overlay {
+    position: fixed;
+    top: 90px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(10, 15, 30, 0.96);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+}
+
+.vq-offline-content {
+    background: rgba(220, 38, 38, 0.18);
+    border: 4px solid #ff2a2a;
+    border-radius: 24px;
+    padding: 60px 90px;
+    box-shadow: 0 0 60px rgba(255, 42, 42, 0.6), inset 0 0 40px rgba(255, 42, 42, 0.25);
+    animation: vqOfflinePulse 1.2s infinite alternate ease-in-out;
+    max-width: 800px;
+    width: 90%;
+}
+
+.vq-offline-icon {
+    font-size: 84px;
+    margin-bottom: 16px;
+    animation: vqOfflineIconFlash 1s infinite alternate ease-in-out;
+}
+
+.vq-offline-title {
+    font-size: 68px;
+    font-weight: 900;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin: 0 0 16px 0;
+    text-shadow: 0 0 20px rgba(255, 42, 42, 0.9), 0 0 40px rgba(255, 42, 42, 0.7);
+    animation: vqOfflineTextFlash 0.8s infinite alternate ease-in-out;
+}
+
+.vq-offline-sub {
+    font-size: 24px;
+    color: #ffcccc;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: 1px;
+}
+
+@keyframes vqOfflinePulse {
+    0% {
+        border-color: #ff2a2a;
+        box-shadow: 0 0 35px rgba(255, 42, 42, 0.5), inset 0 0 20px rgba(255, 42, 42, 0.15);
+        transform: scale(0.98);
+    }
+    100% {
+        border-color: #ff7700;
+        box-shadow: 0 0 80px rgba(255, 119, 0, 0.85), inset 0 0 45px rgba(255, 119, 0, 0.35);
+        transform: scale(1.02);
+    }
+}
+
+@keyframes vqOfflineTextFlash {
+    0% {
+        opacity: 1;
+        color: #ffffff;
+        text-shadow: 0 0 20px rgba(255, 42, 42, 0.9), 0 0 40px rgba(255, 42, 42, 0.7);
+    }
+    50% {
+        opacity: 0.3;
+        color: #ff8888;
+        text-shadow: 0 0 5px rgba(255, 42, 42, 0.3);
+    }
+    100% {
+        opacity: 1;
+        color: #ffffff;
+        text-shadow: 0 0 25px rgba(255, 42, 42, 1), 0 0 50px rgba(255, 42, 42, 0.85);
+    }
+}
+
+@keyframes vqOfflineIconFlash {
+    0% { transform: scale(0.95); }
+    100% { transform: scale(1.15); }
 }
 
 /* System Paused Overlay Banner */
