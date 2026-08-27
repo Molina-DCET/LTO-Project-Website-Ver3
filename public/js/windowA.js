@@ -248,10 +248,33 @@
                 commentRow.style.display = 'none';
             }
 
-            // Display Barcode value as Plain Text
-            const barcodeData = `${ticketId}-${dateStr.replace(/\//g, '')}-${timeStr.replace(/:/g, '')}`;
-            const barcodeElem = document.getElementById('ticket-barcode-text');
-            if (barcodeElem) barcodeElem.textContent = barcodeData;
+        // Check 24-hour cycle daily reset
+        function checkDailyAutoReset() {
+            try {
+                const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' });
+                const lastResetDate = localStorage.getItem('lto_last_reset_date');
+                if (lastResetDate && lastResetDate !== todayStr) {
+                    console.log(`[Auto-Reset] New 24h day detected (${todayStr}). Resetting counters to X-001.`);
+                    localStorage.setItem('counter_P', '0');
+                    localStorage.setItem('counter_R', '0');
+                    localStorage.setItem('counter_M', '0');
+                    localStorage.setItem('counter_L', '0');
+                    localStorage.setItem('counter_O', '0');
+                    localStorage.setItem('lto_last_reset_date', todayStr);
+                } else if (!lastResetDate) {
+                    localStorage.setItem('lto_last_reset_date', todayStr);
+                }
+            } catch (e) {
+                console.error("Daily auto-reset check error:", e);
+            }
+        }
+        checkDailyAutoReset();
+
+        // Display Barcode value as Plain Text with File No. label (e.g. File No. R001-111256)
+        const cleanTicketId = ticketId.replace('-', '');
+        const barcodeData = `${cleanTicketId}-${timeStr.replace(/:/g, '')}`;
+        const barcodeElem = document.getElementById('ticket-barcode-text');
+        if (barcodeElem) barcodeElem.textContent = `File No. ${barcodeData}`;
 
             // Reveal ticket details
             document.getElementById('no-preview-placeholder').style.display = 'none';
@@ -263,6 +286,147 @@
             setTimeout(() => {
                 printBtn.classList.add('animate-fill');
             }, 50);
+        }
+
+        // Send Raw ESC/POS bytes to Python RAW-print bridge for Xprinter XP-58
+        async function sendEscPosPrint(ticket) {
+            try {
+                const ESC = 0x1B;
+                const GS = 0x1D;
+                const encoder = new TextEncoder();
+
+                function textBytes(str) {
+                    return encoder.encode(str);
+                }
+
+                let colorName = 'GREEN';
+                let boxHeader = 'RENEWAL';
+                if (ticket.type === 'Priority' || (ticket.id && ticket.id.startsWith('P-'))) {
+                    colorName = 'PINK';
+                    boxHeader = 'PRIORITY';
+                } else if (ticket.purpose === 'Miscellaneous' || ticket.purpose === 'Misc' || (ticket.id && ticket.id.startsWith('M-'))) {
+                    colorName = 'YELLOW';
+                    boxHeader = 'MISCELLANEOUS';
+                } else if (ticket.purpose === 'Letas' || (ticket.id && ticket.id.startsWith('L-'))) {
+                    colorName = 'WHITE';
+                    boxHeader = 'LETAS';
+                } else if (ticket.purpose === 'Other' || (ticket.id && ticket.id.startsWith('O-'))) {
+                    colorName = 'BLUE';
+                    boxHeader = 'OTHER';
+                }
+
+                let fNo = ticket.fileNo;
+                if (!fNo) {
+                    const barcodeElem = document.getElementById('ticket-barcode-text');
+                    fNo = barcodeElem && barcodeElem.textContent ? barcodeElem.textContent : (ticket.id || '');
+                }
+                fNo = fNo.replace('File No. ', '').replace('Ticket ID: ', '');
+
+                const chunks = [
+                    new Uint8Array([ESC, 0x40]), // Initialize printer
+
+                    // 1. Header (Exclude logo)
+                    new Uint8Array([ESC, 0x61, 0x01, ESC, 0x45, 0x01]), // Center, Bold ON
+                    textBytes("LAND TRANSPORTATION OFFICE\nCABUYAO DISTRICT OFFICE\n"),
+                    new Uint8Array([ESC, 0x45, 0x00]), // Bold OFF
+                    textBytes("--------------------------------\n"),
+
+                    // 2. Ticket Number Section Header
+                    textBytes("TICKET NUMBER\n\n"),
+
+                    // 3. Number Box (Category, Extra Large Ticket ID, Color)
+                    textBytes(`[ ${boxHeader} ]\n\n`),
+                    new Uint8Array([
+                        0x1D, 0x21, 0x21, // GS ! n  -> Triple height & double width
+                        0x1B, 0x45, 0x01  // ESC E n -> Turn bold on
+                    ]),
+                    textBytes(`${ticket.id}\n`),
+                    new Uint8Array([GS, 0x21, 0x00, ESC, 0x45, 0x00]), // Reset size & bold
+                    textBytes(`\nCOLOR: ${colorName}\n`),
+                    textBytes("--------------------------------\n"),
+
+                    // 4. File Number (Exact matching barcode string e.g. File No. R001-111256)
+                    textBytes(`File No. ${fNo}\n`),
+                    textBytes("--------------------------------\n"),
+
+                    // 5. Message
+                    textBytes("Please take your seat and wait\nfor your number appear\non the screen\n"),
+                    textBytes("--------------------------------\n"),
+
+                    // 6. Footer Address & Contact Info
+                    textBytes("154 Areza Town Center,\nBrgy. Canlalay,\nBinan, Laguna.\n"),
+                    textBytes("Contact: +63 222146466 |\n+63 953643536\n"),
+                    textBytes("Email:0420ltocabuyaodo@gmail.com\n\n\n\n\n"),
+
+                    textBytes("--------------------------------\n"),
+
+                    // 2. Ticket Number Section Header
+                    textBytes("TICKET NUMBER\n\n"),
+
+                    // 3. Number Box (Category, Extra Large Ticket ID, Color)
+                    textBytes(`[ ${boxHeader} ]\n\n`),
+                    new Uint8Array([
+                    0x1D, 0x21, 0x22, // GS ! n  -> Triple height & width (0x22 = 34)
+                    0x1B, 0x45, 0x01  // ESC E n -> Turn bold on (0x01 = 1)
+                    ]),textBytes(`${ticket.id}\n`),
+                    new Uint8Array([GS, 0x21, 0x00, ESC, 0x45, 0x00]), // Reset size & bold
+                    textBytes(`\nCOLOR: ${colorName}\n`),
+                    textBytes("--------------------------------\n"),
+
+                    // 4. File Number
+                    textBytes(`FILE NO: ${barcodeVal}\n`),
+                    textBytes("--------------------------------\n"),
+
+                    // Feed lines & Cut
+                    new Uint8Array([0x0A, 0x0A, 0x0A, 0x0A, GS, 0x56, 0x00])
+                ];
+
+                let totalLength = 0;
+                chunks.forEach(c => totalLength += c.length);
+
+                const rawData = new Uint8Array(totalLength);
+                let offset = 0;
+                chunks.forEach(c => {
+                    rawData.set(c, offset);
+                    offset += c.length;
+                });
+
+                let printed = false;
+
+                // 1. Try Python Bridge at http://127.0.0.1:9100/print
+                try {
+                    const r1 = await fetch("http://127.0.0.1:9100/print", {
+                        method: "POST",
+                        body: rawData
+                    });
+                    if (r1.ok) {
+                        printed = true;
+                        console.log("[ESC/POS Print] Sent to Python bridge at 127.0.0.1:9100/print");
+                    }
+                } catch (e1) {
+                    console.log("[ESC/POS Print] Port 9100 bridge unavailable, trying Express server fallback...", e1.message);
+                }
+
+                // 2. Fallback to Express Server /api/print on Port 3000
+                if (!printed) {
+                    try {
+                        const targetUrl = window.location.origin.includes(':3000') ? '/api/print' : 'http://localhost:3000/api/print';
+                        const r2 = await fetch(targetUrl, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/octet-stream" },
+                            body: rawData
+                        });
+                        if (r2.ok) {
+                            printed = true;
+                            console.log("[ESC/POS Print] Sent to Express server at /api/print");
+                        }
+                    } catch (e2) {
+                        console.warn("[ESC/POS Print Notice] Could not connect to printer endpoints on port 9100 or 3000:", e2.message);
+                    }
+                }
+            } catch (err) {
+                console.warn("[ESC/POS Print Error]", err);
+            }
         }
 
         // Print Ticket Action & Page Reset Logic
@@ -294,8 +458,11 @@
             if (initialSection === 'D_E') routeDesc = 'Section D/E (Misc)';
             else if (initialSection === 'E_J') routeDesc = 'Section E-J (Renewal/Other)';
 
+            const rawFileNo = (document.getElementById('ticket-barcode-text').textContent || '').replace('File No. ', '').replace('Ticket ID: ', '');
+
             const ticketObj = {
                 id: ticketNum,
+                fileNo: rawFileNo,
                 name: document.getElementById('ticket-info-name').textContent,
                 date: document.getElementById('ticket-info-date').textContent,
                 time: document.getElementById('ticket-info-time').textContent,
@@ -356,6 +523,9 @@
             stats.hourly[nowHr] = (stats.hourly[nowHr] || 0) + 1;
             localStorage.setItem('lto_stats', JSON.stringify(stats));
             // =====================================================================
+
+            // Send raw ESC/POS commands to thermal printer via local bridge
+            sendEscPosPrint(ticketObj);
 
             // Show toast in lower right indicating print success
             showToast(`Printing Ticket ${ticketNum}... Please take your slip.`, "login");

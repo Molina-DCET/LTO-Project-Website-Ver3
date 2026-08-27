@@ -545,7 +545,7 @@
             else statusEl.style.color = '#0052FF';
 
             document.getElementById('det-ticket-num').textContent = t.id || '---';
-            document.getElementById('det-file-num').textContent = 'File No. ' + fileNo(t.id);
+            document.getElementById('det-file-num').textContent = 'File No. ' + (t.fileNo || fileNo(t.id) || t.id);
 
             document.getElementById('det-current-window').textContent = t.currentWindow || getCurrentWindowLabel(t);
             document.getElementById('det-current-route').textContent = t.currentRoute || (t.purpose ? t.purpose + ' Route' : 'Standard Route');
@@ -605,38 +605,59 @@
         function checkPauseState() {
             var isPaused = localStorage.getItem(LS_PAUSED) === 'true';
             var pauseBtn = document.getElementById('btn-system-pause');
+            var offlineBtn = document.getElementById('btn-system-offline');
             var banner = document.getElementById('cp-pause-banner');
-            pauseBtn.textContent = isPaused ? 'RESUME' : 'PAUSE';
-            pauseBtn.classList.toggle('is-paused', isPaused);
-            banner.classList.toggle('show', isPaused);
+            if (pauseBtn) {
+                pauseBtn.textContent = isPaused ? 'RESUME' : 'PAUSE';
+                pauseBtn.classList.toggle('is-paused', isPaused);
+            }
+            if (offlineBtn) {
+                offlineBtn.textContent = isPaused ? 'ONLINE' : 'OFFLINE';
+                offlineBtn.classList.toggle('is-offline', isPaused);
+            }
+            if (banner) {
+                banner.classList.toggle('show', isPaused);
+            }
         }
         checkPauseState();
+        window.addEventListener('storage', checkPauseState);
 
-        document.getElementById('btn-system-pause').addEventListener('click', function() {
-            var isPaused = localStorage.getItem(LS_PAUSED) === 'true';
-            showConfirmModal({
-                icon: isPaused ? '▶️' : '⏸️',
-                title: isPaused ? 'RESUME SYSTEM' : 'PAUSE SYSTEM',
-                body: isPaused
-                    ? 'Resume the system? Active ticket calling and user actions will be restored.'
-                    : 'Pause the system? All active ticket calls will be suspended and actions disabled across all windows.',
-                confirmText: isPaused ? 'RESUME SYSTEM' : 'PAUSE SYSTEM',
-                confirmClass: 'cp-mbtn-confirm',
-                onConfirm: function() {
-                    localStorage.setItem(LS_PAUSED, (!isPaused).toString());
-                    checkPauseState();
-                }
+        var btnPauseEl = document.getElementById('btn-system-pause');
+        if (btnPauseEl) {
+            btnPauseEl.addEventListener('click', function() {
+                var isPaused = localStorage.getItem(LS_PAUSED) === 'true';
+                showConfirmModal({
+                    icon: isPaused ? '▶️' : '⏸️',
+                    title: isPaused ? 'RESUME SYSTEM' : 'PAUSE SYSTEM',
+                    body: isPaused
+                        ? 'Resume the system? Active ticket calling and user actions will be restored.'
+                        : 'Pause the system? All active ticket calls will be suspended and actions disabled across all windows.',
+                    confirmText: isPaused ? 'RESUME SYSTEM' : 'PAUSE SYSTEM',
+                    confirmClass: isPaused ? 'cp-mbtn-confirm' : 'cp-mbtn-danger',
+                    onConfirm: function() {
+                        localStorage.setItem(LS_PAUSED, (!isPaused).toString());
+                        checkPauseState();
+                        window.dispatchEvent(new Event('storage'));
+                    }
+                });
             });
-        });
+        }
 
-        document.getElementById('btn-system-reset').addEventListener('click', function() {
+        function triggerSystemReset() {
             showConfirmModal({
                 icon: '⚠️',
-                title: 'RESET SYSTEM',
-                body: 'WARNING: This will clear ALL active queues, tickets, on-hold records, accomplished data, and calling states across the entire system. This cannot be undone.',
-                confirmText: 'RESET ALL DATA',
+                title: 'RESET SYSTEM & COUNTERS',
+                body: 'WARNING: This will reset all ticket counters back to X-001 and clear ALL active queues, on-hold records, accomplished data, and calling states across the entire system.',
+                confirmText: 'RESET COUNTERS (X-001)',
                 confirmClass: 'cp-mbtn-danger',
                 onConfirm: function() {
+                    // Reset all prefix counters back to 0
+                    localStorage.setItem('counter_P', '0');
+                    localStorage.setItem('counter_R', '0');
+                    localStorage.setItem('counter_M', '0');
+                    localStorage.setItem('counter_L', '0');
+                    localStorage.setItem('counter_O', '0');
+
                     localStorage.removeItem(LS_QUEUE);
                     localStorage.removeItem(LS_HOLD);
                     localStorage.removeItem(LS_ACC);
@@ -647,14 +668,51 @@
                         localStorage.removeItem('lto_stats_window' + id);
                         localStorage.removeItem('lto_stats_' + id);
                     });
+
+                    // Call backend reset API
+                    try {
+                        fetch('/api/system/reset', { method: 'POST' }).catch(function() {});
+                    } catch (e) {}
+
                     checkPauseState();
+                    window.dispatchEvent(new Event('storage'));
                     selectedTicketId = null;
                     clearTicketDetail();
                     refreshAllData();
-                    showToast('System reset complete. All data cleared.', 'login');
+                    showToast('System reset complete. Ticket counters reset to X-001.', 'login');
                 }
             });
-        });
+        }
+
+        var btnResetCounters = document.getElementById('cp-reset-counters-btn');
+        if (btnResetCounters) {
+            btnResetCounters.addEventListener('click', triggerSystemReset);
+        }
+        var btnSysReset = document.getElementById('btn-system-reset');
+        if (btnSysReset) {
+            btnSysReset.addEventListener('click', triggerSystemReset);
+        }
+
+        var btnOfflineEl = document.getElementById('btn-system-offline');
+        if (btnOfflineEl) {
+            btnOfflineEl.addEventListener('click', function() {
+                var isPaused = localStorage.getItem(LS_PAUSED) === 'true';
+                showConfirmModal({
+                    icon: isPaused ? '▶️' : '⏸️',
+                    title: isPaused ? 'ONLINE SYSTEM' : 'OFFLINE SYSTEM',
+                    body: isPaused
+                        ? 'Online the system? Active ticket calling and user actions will be restored.'
+                        : 'Offline the system? All active ticket calls will be suspended and actions disabled across all windows.',
+                    confirmText: isPaused ? 'ONLINE SYSTEM' : 'OFFLINE SYSTEM',
+                    confirmClass: isPaused ? 'cp-mbtn-confirm' : 'cp-mbtn-danger',
+                    onConfirm: function() {
+                        localStorage.setItem(LS_PAUSED, (!isPaused).toString());
+                        checkPauseState();
+                        window.dispatchEvent(new Event('storage'));
+                    }
+                });
+            });
+        }
 
         /* ===================================================================
            12. TICKET MODIFICATION ACTIONS (COMPLETE, TRANSFER, DELETE)

@@ -140,6 +140,13 @@ function updateClock() {
         }
 
         async function processAudioQueue() {
+            if (localStorage.getItem('lto_system_paused') === 'true') {
+                isAudioAnnouncing = false;
+                audioQueue.length = 0;
+                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+                return;
+            }
+
             if (audioQueue.length === 0) {
                 isAudioAnnouncing = false;
                 syncScreenDisplay();
@@ -390,7 +397,19 @@ function updateClock() {
            =================================================================== */
         const windowIds = ['cashier', 'windowA', 'windowB', 'windowC', 'windowD', 'windowE', 'windowF', 'windowG', 'windowH', 'windowI', 'windowJ', 'windowM', 'windowN'];
 
+        function checkOfflineState() {
+            const isOffline = localStorage.getItem('lto_system_paused') === 'true';
+            const overlay = document.getElementById('vq-offline-overlay');
+            if (overlay) {
+                overlay.style.display = isOffline ? 'flex' : 'none';
+            }
+            if (isOffline && 'speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+        }
+
         function checkCallingUpdates() {
+            checkOfflineState();
             windowIds.forEach((wId) => {
                 try {
                     const key = 'lto_' + wId + '_active_calling';
@@ -439,6 +458,7 @@ function updateClock() {
 
         window.addEventListener('storage', checkCallingUpdates);
         setInterval(checkCallingUpdates, 300);
+        checkOfflineState();
 
         /* ===================================================================
            5. TEST & DEMO SIMULATION HELPERS

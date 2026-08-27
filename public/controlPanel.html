@@ -55,10 +55,10 @@
         <img src="assets/img/logo.png" alt="LTO Logo Watermark" class="hero-watermark">
 
         <div class="cp-container">
-            <!-- Header Row: Title & Window Selector & Subtitle -->
+            <!-- Header Row: Title & Window Selector -->
             <div class="cp-header-row">
                 <h1 class="cp-main-title">CONTROL PANEL</h1>
-                <div style="display:flex; align-items:center; gap:14px;">
+                <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
                     <select id="cp-window-select" class="cp-window-select" aria-label="Select window for statistics">
                         <option value="Overall" selected>Overall</option>
                         <option value="windowB">B</option>
@@ -161,10 +161,10 @@
                 </div>
             </div>
 
-            <!-- System Modification Controls: RESET & PAUSE/RESUME -->
+            <!-- System Modification Controls: OFFLINE & RESET COUNTERS -->
             <div class="cp-controls-row">
-                <button type="button" class="cp-ctrl-btn cp-btn-reset" id="btn-system-reset">RESET</button>
-                <button type="button" class="cp-ctrl-btn cp-btn-pause" id="btn-system-pause">PAUSE</button>
+                <button type="button" class="cp-ctrl-btn cp-btn-offline" id="btn-system-offline">OFFLINE</button>
+                <button type="button" class="cp-ctrl-btn cp-btn-reset" id="btn-system-reset">RESET COUNTERS</button>
             </div>
 
             <!-- Section Header: TICKET ENTRIES -->
@@ -220,10 +220,9 @@
                         <div class="cp-ticket-display">
                             <div class="cp-td-label">TICKET NUMBER</div>
                             <div class="cp-td-number" id="det-ticket-num">---</div>
-                            <div class="cp-td-file" id="det-file-num">File No. —</div>
+                            <div class="cp-td-file" id="det-file-num">Ticket ID: —</div>
                         </div>
                     </div>
-
                     <!-- Action History Log Container -->
                     <div class="cp-history-group">
                         <div class="cp-history-title">ACTION HISTORY</div>
@@ -245,13 +244,11 @@
                 <!-- Right List & Search Card -->
                 <div class="cp-list-card">
                     <input type="text" id="cp-search-input" class="cp-search-input"
-                        placeholder="FILE NUMBER/ TICKET NUMBER"
-                        aria-label="Search by File Number or Ticket Number">
+                        placeholder="TICKET ID / TICKET NUMBER"
+                        aria-label="Search by Ticket ID or Ticket Number">
                     <div class="cp-tickets-scroll" id="cp-tickets-list">
                         <!-- Rendered ticket items populate here -->
                     </div>
-                </div>
-            </div>
         </div>
     </main>
 
