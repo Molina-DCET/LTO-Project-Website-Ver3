@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
+const { execFile, spawn } = require('child_process');
 const { DatabaseSync } = require('node:sqlite');
 
 const app = express();
@@ -489,6 +491,38 @@ app.post('/api/system/pause', (req, res) => {
     }
 });
 
+app.post('/api/system/reset', (req, res) => {
+    try {
+        db.exec(`
+            DELETE FROM tickets;
+            DELETE FROM active_calling;
+            DELETE FROM window_stats;
+        `);
+        res.json({ success: true, message: 'System queue database reset to 0' });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Server-side 24-hour cycle daily reset check (Manila timezone)
+let lastServerResetDate = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' });
+setInterval(() => {
+    try {
+        const currentDate = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' });
+        if (currentDate !== lastServerResetDate) {
+            console.log(`[Auto-Reset] Server 24h transition detected (${currentDate}). Resetting DB queues & stats.`);
+            db.exec(`
+                DELETE FROM tickets;
+                DELETE FROM active_calling;
+                DELETE FROM window_stats;
+            `);
+            lastServerResetDate = currentDate;
+        }
+    } catch (err) {
+        console.error('[Auto-Reset Error]', err.message);
+    }
+}, 60000);
+
 // ─────────────────────────────────────────────────────────────────────────────
 // 8. SPA FALLBACK ROUTING
 // ─────────────────────────────────────────────────────────────────────────────
@@ -500,14 +534,34 @@ app.use((req, res, next) => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 9. START SERVER
+// 9. START SERVER & AUTO-SPAWN PRINTER BRIDGE
 // ─────────────────────────────────────────────────────────────────────────────
+let pyBridgeProcess = null;
+
 const server = app.listen(PORT, HOST, () => {
     console.log(`=======================================================`);
     console.log(` LTO Queuing System Server (SQLite + Short Polling)`);
     console.log(` Running on: http://${HOST}:${PORT}`);
     console.log(` Database:   ${dbPath}`);
+
+    // Auto-launch Python printer bridge if available
+    const bridgePath = path.join(__dirname, '..', 'printtest', 'printerbridge.py');
+    if (fs.existsSync(bridgePath)) {
+        try {
+            pyBridgeProcess = spawn('python', [bridgePath], { stdio: 'ignore', detached: false });
+            console.log(` Printer Bridge: Running printerbridge.py on http://127.0.0.1:9100`);
+        } catch (e) {
+            console.warn(` Printer Bridge Notice: Could not spawn python bridge:`, e.message);
+        }
+    }
     console.log(`=======================================================`);
+});
+
+process.on('SIGINT', () => {
+    if (pyBridgeProcess) {
+        try { pyBridgeProcess.kill(); } catch (_) {}
+    }
+    process.exit(0);
 });
 
 module.exports = { app, server, db };

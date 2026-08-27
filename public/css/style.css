@@ -1533,11 +1533,12 @@ body {
 }
 
 .ticket-box-number {
-    font-size: 3.5rem;
+    font-size: 6rem;
     font-weight: 900;
     line-height: 1;
     color: #000000;
-    margin: 2px 0;
+    margin: 8px 0;
+    letter-spacing: 3px;
 }
 
 .ticket-box-color {
