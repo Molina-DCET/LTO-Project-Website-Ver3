@@ -491,6 +491,37 @@ app.post('/api/system/pause', (req, res) => {
     }
 });
 
+// Reset counters only — no DB data deleted (counters live in localStorage client-side)
+app.post('/api/system/reset-counters', (req, res) => {
+    res.json({ success: true, message: 'Counter reset acknowledged. Client will clear localStorage counters.' });
+});
+
+// Full system reset — returns DB snapshot first, then deletes all data
+app.post('/api/system/reset-full', (req, res) => {
+    try {
+        // 1. Collect full snapshot before deleting
+        const tickets = db.prepare('SELECT * FROM tickets ORDER BY created_at ASC').all();
+        const calling = db.prepare('SELECT * FROM active_calling').all();
+        const stats   = db.prepare('SELECT * FROM window_stats').all();
+
+        // 2. Delete all data
+        db.exec(`
+            DELETE FROM tickets;
+            DELETE FROM active_calling;
+            DELETE FROM window_stats;
+        `);
+
+        res.json({
+            success: true,
+            message: 'Full system reset complete.',
+            snapshot: { tickets, calling, stats, printedAt: new Date().toISOString() }
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Legacy endpoint kept for compatibility
 app.post('/api/system/reset', (req, res) => {
     try {
         db.exec(`

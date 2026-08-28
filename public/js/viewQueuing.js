@@ -356,7 +356,7 @@ function updateClock() {
                 subTitleEl.className = 'hold-cat-subtitle ' + catObj.cssClass;
 
                 const filtered = holdTickets.filter(t => {
-                    const c = getCategoryInfo(t.id, t.purpose, t.type);
+                    const c = getCategoryInfo(t.displayId || t.id, t.purpose, t.type);
                     return c.key === catObj.key;
                 });
 
@@ -367,7 +367,7 @@ function updateClock() {
                     filtered.forEach(t => {
                         const tr = document.createElement('tr');
                         const targetWin = t.heldByWindow || t.currentWindow || t.calledBy || formatWindowName(t.currentSection || 'Window B');
-                        tr.innerHTML = `<td>${t.id}</td><td>${targetWin}</td>`;
+                        tr.innerHTML = `<td>${t.displayId || t.id}</td><td>${targetWin}</td>`;
                         bodyEl.appendChild(tr);
                     });
                 }
@@ -435,7 +435,7 @@ function updateClock() {
                     const callObj = {
                         windowId: wId,
                         windowName: formatWindowName(wId),
-                        ticketId: data.ticket.id,
+                        ticketId: data.ticket.displayId || data.ticket.id,  // show short R-001 format
                         purpose: data.ticket.purpose,
                         type: data.ticket.type,
                         isCashier: isCashier,

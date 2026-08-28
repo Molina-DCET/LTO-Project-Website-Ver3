@@ -2063,6 +2063,17 @@ body.page-exit {
     animation: pausePulse 1.5s infinite alternate;
 }
 
+/* Reset System — deeper danger crimson to distinguish from Reset Counters */
+.cp-btn-reset-full {
+    background: linear-gradient(180deg, #8b0000 0%, #3d0000 100%);
+    box-shadow: 0 0 0 2px rgba(220, 0, 0, 0.35);
+    letter-spacing: 0.04em;
+}
+.cp-btn-reset-full:hover {
+    background: linear-gradient(180deg, #c00000 0%, #600000 100%);
+    box-shadow: 0 0 14px rgba(200, 0, 0, 0.55);
+}
+
 @keyframes pausePulse {
     from { box-shadow: 0 0 10px rgba(0, 204, 68, 0.4); }
     to { box-shadow: 0 0 25px rgba(0, 204, 68, 0.9); }

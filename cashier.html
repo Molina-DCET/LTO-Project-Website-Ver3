@@ -1035,7 +1035,7 @@
                     <!-- Transaction Info -->
                     <div class="wb-txn-pane">
                         <div class="wb-txn-section-label">Transaction Info</div>
-                        <div class="wb-txn-row"><span class="wb-txn-lbl">File Number:</span> <span class="wb-txn-val"
+                        <div class="wb-txn-row"><span class="wb-txn-lbl">Ticket ID:</span> <span class="wb-txn-val"
                                 id="txn-file">&#8212;</span></div>
                         <div class="wb-txn-row"><span class="wb-txn-lbl">Name:</span><span class="wb-txn-val"
                                 id="txn-name">&#8212;</span></div>
@@ -1091,7 +1091,7 @@
 
                 <!-- Lower Search Field for Ticket / File Number -->
                 <div class="wb-list-search-box">
-                    <input type="text" id="list-search-input" placeholder="Search Ticket or File No..."
+                    <input type="text" id="list-search-input" placeholder="Search Ticket or Ticket ID..."
                         autocomplete="off">
                 </div>
             </div>
@@ -1194,7 +1194,7 @@
             <div class="wb-modal-ctx" id="m-ctx">Pending Ticket</div>
             <div class="wb-modal-num" id="m-num">R-001</div>
             <div class="wb-modal-details">
-                <div class="wb-modal-drow"><span class="wb-modal-dlbl">File No</span> <span class="wb-modal-dval"
+                <div class="wb-modal-drow"><span class="wb-modal-dlbl">Ticket ID</span> <span class="wb-modal-dval"
                         id="m-file">&#8212;</span></div>
                 <div class="wb-modal-drow"><span class="wb-modal-dlbl">Name</span> <span class="wb-modal-dval"
                         id="m-name">&#8212;</span></div>
@@ -1563,7 +1563,7 @@
             if (searchQuery) {
                 list = list.filter(function (ticket) {
                     var tid = (ticket.id || '').toLowerCase();
-                    var fno = fileNo(ticket.id || '').toLowerCase();
+                    var fno = fileNo(ticket).toLowerCase();
                     var name = (ticket.name || '').toLowerCase();
                     return tid.indexOf(searchQuery) !== -1 || fno.indexOf(searchQuery) !== -1 || name.indexOf(searchQuery) !== -1;
                 });
@@ -1652,7 +1652,10 @@
         /* ===================================================================
            CALLING LOGIC
         =================================================================== */
-        function fileNo(id) {
+        function fileNo(t) {
+            if (!t) return '\u2014';
+            if (typeof t === 'object' && t.fileNo) return t.fileNo;
+            var id = typeof t === 'object' ? (t.id || '') : String(t);
             if (!id) return '\u2014';
             var h = 0;
             for (var i = 0; i < id.length; i++) h += id.charCodeAt(i);
@@ -1661,7 +1664,7 @@
 
         function refreshCallingUI() {
             var t = currentCalling;
-            document.getElementById('txn-file').textContent = t ? fileNo(t.id) : '\u2014';
+            document.getElementById('txn-file').textContent = t ? fileNo(t) : '\u2014';
             document.getElementById('txn-name').textContent = t ? t.name : '\u2014';
             document.getElementById('txn-date').textContent = t ? t.date : '\u2014';
             document.getElementById('txn-time').textContent = t ? t.time : '\u2014';
@@ -1675,7 +1678,7 @@
             if (t) {
                 numEl.textContent = t.id;
                 numEl.classList.remove('wb-empty');
-                fileEl.textContent = 'File No. ' + fileNo(t.id);
+                fileEl.textContent = 'Ticket ID: ' + fileNo(t);
             } else {
                 numEl.textContent = 'NONE';
                 numEl.classList.add('wb-empty');
@@ -1820,7 +1823,7 @@
             mIdx = idx; mTab = tab;
             document.getElementById('m-ctx').textContent = tab === 'pending' ? 'Pending Ticket' : 'On Hold Ticket';
             document.getElementById('m-num').textContent = ticket.id;
-            document.getElementById('m-file').textContent = fileNo(ticket.id);
+            document.getElementById('m-file').textContent = fileNo(ticket);
             document.getElementById('m-name').textContent = ticket.name || '\u2014';
             document.getElementById('m-date').textContent = ticket.date || '\u2014';
             document.getElementById('m-time').textContent = ticket.time || '\u2014';

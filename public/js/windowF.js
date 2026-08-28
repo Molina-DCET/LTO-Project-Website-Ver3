@@ -137,7 +137,7 @@
                 try {
                     var callingData = JSON.parse(localStorage.getItem('lto_' + id + '_active_calling'));
                     if (callingData && callingData.ticket) {
-                        var exists = allTickets.some(function (t) { return t.id === callingData.ticket.id; });
+                        var exists = allTickets.some(function (t) { return getTicketKey(t) === getTicketKey(callingData.ticket); });
                         if (!exists) allTickets.push(callingData.ticket);
                     }
                 } catch (e) { }
@@ -319,7 +319,7 @@
                 ticket.currentWindow = 'Queue for ' + nextSec;
                 _addHistory(ticket, 'Advanced from ' + _winLabel() + ' to ' + nextSec, 'ADVANCED');
                 var raw = JSON.parse(localStorage.getItem(LS_QUEUE) || '[]');
-                raw = raw.filter(function (item) { return item.id !== ticket.id; });
+                raw = raw.filter(function (item) { return getTicketKey(item) !== getTicketKey(ticket); });
                 raw.push(ticket);
                 localStorage.setItem(LS_QUEUE, JSON.stringify(raw));
 
@@ -352,7 +352,7 @@
             if (searchQuery) {
                 list = list.filter(function (ticket) {
                     var tid = (ticket.id || '').toLowerCase();
-                    var fno = fileNo(ticket.id || '').toLowerCase();
+                    var fno = fileNo(ticket).toLowerCase();
                     var name = (ticket.name || '').toLowerCase();
                     return tid.indexOf(searchQuery) !== -1 || fno.indexOf(searchQuery) !== -1 || name.indexOf(searchQuery) !== -1;
                 });
@@ -441,16 +441,26 @@
         /* ===================================================================
            CALLING LOGIC
         =================================================================== */
-        function fileNo(id) {
+        function fileNo(t) {
+            if (!t) return '\u2014';
+            if (typeof t === 'object' && t.fileNo) return t.fileNo;
+            var id = typeof t === 'object' ? (t.id || '') : String(t);
             if (!id) return '\u2014';
             var h = 0;
             for (var i = 0; i < id.length; i++) h += id.charCodeAt(i);
             return id.replace('-', '') + '-' + ((h * 4317) % 90000000 + 10000000);
         }
 
+        
+        function getTicketKey(t) {
+            if (!t) return '';
+            if (typeof t === 'string') return t;
+            return t.fileNo || (t.id + '_' + (t.printedAt || '') + '_' + (t.name || ''));
+        }
+
         function refreshCallingUI() {
             var t = currentCalling;
-            document.getElementById('txn-file').textContent = t ? fileNo(t.id) : '\u2014';
+            document.getElementById('txn-file').textContent = t ? fileNo(t) : '\u2014';
             document.getElementById('txn-name').textContent = t ? t.name : '\u2014';
             document.getElementById('txn-date').textContent = t ? t.date : '\u2014';
             document.getElementById('txn-time').textContent = t ? t.time : '\u2014';
@@ -462,9 +472,9 @@
             var fileEl = document.getElementById('calling-file');
 
             if (t) {
-                numEl.textContent = t.id;
+                numEl.textContent = t.displayId || t.id;
                 numEl.classList.remove('wb-empty');
-                fileEl.textContent = 'File No. ' + fileNo(t.id);
+                fileEl.textContent = 'Ticket ID: ' + fileNo(t);
             } else {
                 numEl.textContent = 'NONE';
                 numEl.classList.add('wb-empty');
@@ -537,7 +547,7 @@
             var next = q.shift();
             // Remove 'next' from raw ticket queue so it is in calling state
             var raw = JSON.parse(localStorage.getItem(LS_QUEUE) || '[]');
-            raw = raw.filter(function (item) { return item.id !== next.id; });
+            raw = raw.filter(function (item) { return getTicketKey(item) !== getTicketKey(next); });
             localStorage.setItem(LS_QUEUE, JSON.stringify(raw));
 
             currentCalling = next;
@@ -608,7 +618,7 @@
             mIdx = idx; mTab = tab;
             document.getElementById('m-ctx').textContent = tab === 'pending' ? 'Pending Ticket' : 'On Hold Ticket';
             document.getElementById('m-num').textContent = ticket.id;
-            document.getElementById('m-file').textContent = fileNo(ticket.id);
+            document.getElementById('m-file').textContent = fileNo(ticket);
             document.getElementById('m-name').textContent = ticket.name || '\u2014';
             document.getElementById('m-date').textContent = ticket.date || '\u2014';
             document.getElementById('m-time').textContent = ticket.time || '\u2014';
@@ -643,11 +653,11 @@
 
             if (mTab === 'pending') {
                 var raw = JSON.parse(localStorage.getItem(LS_QUEUE) || '[]');
-                raw = raw.filter(function (item) { return item.id !== ticket.id; });
+                raw = raw.filter(function (item) { return getTicketKey(item) !== getTicketKey(ticket); });
                 localStorage.setItem(LS_QUEUE, JSON.stringify(raw));
             } else {
                 var rawH = JSON.parse(localStorage.getItem(LS_HOLD) || '[]');
-                rawH = rawH.filter(function (item) { return item.id !== ticket.id; });
+                rawH = rawH.filter(function (item) { return getTicketKey(item) !== getTicketKey(ticket); });
                 localStorage.setItem(LS_HOLD, JSON.stringify(rawH));
             }
 
@@ -666,7 +676,7 @@
             if (!t) { closeModal(); return; }
             var raw = JSON.parse(localStorage.getItem(LS_QUEUE) || '[]');
             raw.forEach(function (item) { item.nextToBeCalled = false; });
-            var found = raw.find(function (item) { return item.id === t.id; });
+            var found = raw.find(function (item) { return getTicketKey(item) === getTicketKey(t); });
             if (found) {
                 found.nextToBeCalled = true;
                 _addHistory(found, 'Designated as Next to be Called at ' + _winLabel(), 'PRIORITIZED');

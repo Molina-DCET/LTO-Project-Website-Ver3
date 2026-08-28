@@ -351,7 +351,7 @@
                         <div class="cp-ticket-display">
                             <div class="cp-td-label">TICKET NUMBER</div>
                             <div class="cp-td-number" id="det-ticket-num">---</div>
-                            <div class="cp-td-file" id="det-file-num">File No. —</div>
+                            <div class="cp-td-file" id="det-file-num">Ticket ID: —</div>
                         </div>
                     </div>
 
@@ -941,7 +941,7 @@
             else statusEl.style.color = '#0052FF';
 
             document.getElementById('det-ticket-num').textContent = t.id || '---';
-            document.getElementById('det-file-num').textContent = 'File No. ' + fileNo(t.id);
+            document.getElementById('det-file-num').textContent = 'Ticket ID: ' + fileNo(t);
 
             document.getElementById('det-current-window').textContent = t.currentWindow || getCurrentWindowLabel(t);
             document.getElementById('det-current-route').textContent = t.currentRoute || (t.purpose ? t.purpose + ' Route' : 'Standard Route');
@@ -988,7 +988,7 @@
             document.getElementById('det-current-route').textContent = '—';
             document.getElementById('det-status').textContent = '—';
             document.getElementById('det-ticket-num').textContent = '---';
-            document.getElementById('det-file-num').textContent = 'File No. —';
+            document.getElementById('det-file-num').textContent = 'Ticket ID: —';
             document.getElementById('det-history-list').innerHTML = '<div class="cp-history-item"><span class="cp-history-desc">No ticket selected</span></div>';
             document.getElementById('btn-act-complete').disabled = true;
             document.getElementById('btn-act-transfer').disabled = true;
@@ -1161,7 +1161,7 @@
             var extraHTML =
                 '<div style="text-align:left;font-size:0.8rem;margin-top:12px;color:#333;">' +
                     '<div style="margin-bottom:6px;"><strong>Ticket:</strong> ' + ticket.id + '</div>' +
-                    '<div style="margin-bottom:6px;"><strong>File No.:</strong> ' + fileNo(ticket.id) + '</div>' +
+                    '<div style="margin-bottom:6px;"><strong>Ticket ID:</strong> ' + fileNo(ticket.id) + '</div>' +
                     '<div style="margin-bottom:6px;"><strong>Current Window:</strong> ' + currentLabel + '</div>' +
                     '<div style="margin-bottom:8px;font-weight:900;">Transfer Destination:</div>' +
                 '</div>' +

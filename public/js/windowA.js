@@ -270,11 +270,17 @@
         }
         checkDailyAutoReset();
 
-        // Display Barcode value as Plain Text with File No. label (e.g. File No. R001-111256)
-        const cleanTicketId = ticketId.replace('-', '');
-        const barcodeData = `${cleanTicketId}-${timeStr.replace(/:/g, '')}`;
+        // Display Barcode value as Plain Text with Ticket ID label
+        function fileNo(id) {
+            if (!id) return '—';
+            var str = id + '_' + Date.now();
+            var h = 0;
+            for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) & 0x7FFFFFFF;
+            return id.replace('-', '') + '-' + ((h % 90000000) + 10000000);
+        }
+        const barcodeData = fileNo(ticketId);
         const barcodeElem = document.getElementById('ticket-barcode-text');
-        if (barcodeElem) barcodeElem.textContent = `File No. ${barcodeData}`;
+        if (barcodeElem) barcodeElem.textContent = `Ticket ID: ${barcodeData}`;
 
             // Reveal ticket details
             document.getElementById('no-preview-placeholder').style.display = 'none';
@@ -323,95 +329,60 @@
                 fNo = fNo.replace('File No. ', '').replace('Ticket ID: ', '');
 
                 const chunks = [
-                    new Uint8Array([ESC, 0x40]), // Initialize printer
-
-                    // 1. Header (Exclude logo)
-                    new Uint8Array([ESC, 0x61, 0x01, ESC, 0x45, 0x01]), // Center, Bold ON
-                    textBytes("LAND TRANSPORTATION OFFICE\nCABUYAO DISTRICT OFFICE\n"),
-                    new Uint8Array([ESC, 0x45, 0x00]), // Bold OFF
+                    new Uint8Array([ESC, 0x40]), // Initialize
+                    new Uint8Array([ESC, 0x61, 0x01]), // Center align
+                    new Uint8Array([ESC, 0x21, 0x30]), // Quad size (double width & height)
+                    textBytes("LTO CABUYAO\n"),
+                    new Uint8Array([ESC, 0x21, 0x00]), // Normal size
+                    textBytes("DISTRICT OFFICE\n"),
                     textBytes("--------------------------------\n"),
-
-                    // 2. Ticket Number Section Header
-                    textBytes("TICKET NUMBER\n\n"),
-
-                    // 3. Number Box (Category, Extra Large Ticket ID, Color)
-                    textBytes(`[ ${boxHeader} ]\n\n`),
-                    new Uint8Array([
-                        0x1D, 0x21, 0x21, // GS ! n  -> Triple height & double width
-                        0x1B, 0x45, 0x01  // ESC E n -> Turn bold on
-                    ]),
+                    new Uint8Array([ESC, 0x45, 0x01]), // Bold ON
+                    textBytes(`${boxHeader}\n`),
+                    new Uint8Array([ESC, 0x21, 0x30]), // Huge text for Ticket ID
                     textBytes(`${ticket.id}\n`),
-                    new Uint8Array([GS, 0x21, 0x00, ESC, 0x45, 0x00]), // Reset size & bold
-                    textBytes(`\nCOLOR: ${colorName}\n`),
+                    new Uint8Array([GS, 0x21, 0x00], ESC, 0x45, 0x00), // Reset size & bold
+                    textBytes(`Ticket ID: ${fNo}\n`),
+                    textBytes(`Color: ${colorName}\n`),
                     textBytes("--------------------------------\n"),
-
-                    // 4. File Number (Exact matching barcode string e.g. File No. R001-111256)
-                    textBytes(`File No. ${fNo}\n`),
-                    textBytes("--------------------------------\n"),
-
-                    // 5. Message
-                    textBytes("Please take your seat and wait\nfor your number appear\non the screen\n"),
-                    textBytes("--------------------------------\n"),
-
-                    // 6. Footer Address & Contact Info
-                    textBytes("154 Areza Town Center,\nBrgy. Canlalay,\nBinan, Laguna.\n"),
-                    textBytes("Contact: +63 222146466 |\n+63 953643536\n"),
-                    textBytes("Email:0420ltocabuyaodo@gmail.com\n\n\n\n\n"),
-
-                    textBytes("--------------------------------\n"),
-
-                    // 2. Ticket Number Section Header
-                    textBytes("TICKET NUMBER\n\n"),
-
-                    // 3. Number Box (Category, Extra Large Ticket ID, Color)
-                    textBytes(`[ ${boxHeader} ]\n\n`),
-                    new Uint8Array([
-                    0x1D, 0x21, 0x22, // GS ! n  -> Triple height & width (0x22 = 34)
-                    0x1B, 0x45, 0x01  // ESC E n -> Turn bold on (0x01 = 1)
-                    ]),textBytes(`${ticket.id}\n`),
-                    new Uint8Array([GS, 0x21, 0x00, ESC, 0x45, 0x00]), // Reset size & bold
-                    textBytes(`\nCOLOR: ${colorName}\n`),
-                    textBytes("--------------------------------\n"),
-
-                    // 4. File Number
-                    textBytes(`FILE NO: ${barcodeVal}\n`),
-                    textBytes("--------------------------------\n"),
-
-                    // Feed lines & Cut
-                    new Uint8Array([0x0A, 0x0A, 0x0A, 0x0A, GS, 0x56, 0x00])
+                    new Uint8Array([ESC, 0x61, 0x00]), // Left align
+                    textBytes(`Name: ${ticket.name || 'Unknown'}\n`),
+                    textBytes(`Date: ${ticket.date || ''}\n`),
+                    textBytes(`Time: ${ticket.time || ''}\n`),
+                    textBytes(`Type: ${ticket.type || 'Regular'}\n`),
+                    textBytes(`Purpose: ${ticket.purpose || ''}\n`)
                 ];
 
-                let totalLength = 0;
-                chunks.forEach(c => totalLength += c.length);
+                if (ticket.comment) {
+                    chunks.push(textBytes(`Comment: ${ticket.comment}\n`));
+                }
 
-                const rawData = new Uint8Array(totalLength);
+                chunks.push(textBytes("--------------------------------\n"));
+                chunks.push(new Uint8Array([ESC, 0x61, 0x01])); // Center align
+                chunks.push(textBytes("Thank you for waiting!\n\n\n\n"));
+                chunks.push(new Uint8Array([GS, 0x56, 0x41, 0x03])); // Cut paper
+
+                const totalLen = chunks.reduce((acc, c) => acc + c.length, 0);
+                const rawData = new Uint8Array(totalLen);
                 let offset = 0;
-                chunks.forEach(c => {
-                    rawData.set(c, offset);
-                    offset += c.length;
-                });
+                for (const chunk of chunks) {
+                    rawData.set(chunk, offset);
+                    offset += chunk.length;
+                }
 
                 let printed = false;
-
-                // 1. Try Python Bridge at http://127.0.0.1:9100/print
                 try {
                     const r1 = await fetch("http://127.0.0.1:9100/print", {
                         method: "POST",
+                        headers: { "Content-Type": "application/octet-stream" },
                         body: rawData
                     });
                     if (r1.ok) {
                         printed = true;
-                        console.log("[ESC/POS Print] Sent to Python bridge at 127.0.0.1:9100/print");
+                        console.log("[ESC/POS Print] Sent to Python bridge on port 9100");
                     }
                 } catch (e1) {
-                    console.log("[ESC/POS Print] Port 9100 bridge unavailable, trying Express server fallback...", e1.message);
-                }
-
-                // 2. Fallback to Express Server /api/print on Port 3000
-                if (!printed) {
                     try {
-                        const targetUrl = window.location.origin.includes(':3000') ? '/api/print' : 'http://localhost:3000/api/print';
-                        const r2 = await fetch(targetUrl, {
+                        const r2 = await fetch("/api/print", {
                             method: "POST",
                             headers: { "Content-Type": "application/octet-stream" },
                             body: rawData
@@ -461,7 +432,8 @@
             const rawFileNo = (document.getElementById('ticket-barcode-text').textContent || '').replace('File No. ', '').replace('Ticket ID: ', '');
 
             const ticketObj = {
-                id: ticketNum,
+                id: ticketNum,                // unique ID: R001-093045 (internal use)
+                displayId: document.getElementById('ticket-box-num').textContent, // short: R-001 (for calling display)
                 fileNo: rawFileNo,
                 name: document.getElementById('ticket-info-name').textContent,
                 date: document.getElementById('ticket-info-date').textContent,

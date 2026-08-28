@@ -11,6 +11,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="js/api.js" defer></script>
     <script src="js/controlPanel.js" defer></script>
+    <!-- PDF generation libraries for Reset System report -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 
 <body>
@@ -161,10 +164,11 @@
                 </div>
             </div>
 
-            <!-- System Modification Controls: OFFLINE & RESET COUNTERS -->
+            <!-- System Modification Controls: OFFLINE, RESET COUNTERS & RESET SYSTEM -->
             <div class="cp-controls-row">
                 <button type="button" class="cp-ctrl-btn cp-btn-offline" id="btn-system-offline">OFFLINE</button>
                 <button type="button" class="cp-ctrl-btn cp-btn-reset" id="btn-system-reset">RESET COUNTERS</button>
+                <button type="button" class="cp-ctrl-btn cp-btn-reset-full" id="btn-system-reset-full">⚠ RESET SYSTEM</button>
             </div>
 
             <!-- Section Header: TICKET ENTRIES -->
@@ -268,6 +272,9 @@
 
     <!-- Toast Container -->
     <div id="toast-container" style="position:fixed;bottom:20px;right:20px;z-index:99999;display:flex;flex-direction:column-reverse;gap:10px;"></div>
+
+    <!-- Hidden container for PDF report rendering -->
+    <div id="reset-report-container" style="position:fixed;left:-9999px;top:0;width:800px;background:#fff;padding:20px;font-family:Arial,sans-serif;font-size:12px;color:#111;z-index:-1;"></div>
 
     <!-- Scripts for Logic & Control Panel Operations -->
     
