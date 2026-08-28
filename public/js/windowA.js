@@ -338,27 +338,26 @@ async function sendEscPosPrint(ticket) {
             textBytes("--------------------------------\n"),
             new Uint8Array([ESC, 0x45, 0x01]), // Bold ON
             textBytes(`${boxHeader}\n`),
-            new Uint8Array([ESC, 0x21, 0x30]), // Huge text for Ticket ID
+            new Uint8Array([GS, 0x21, 0x33]), // Huge text for Ticket ID
             textBytes(`${ticket.id}\n`),
             new Uint8Array([GS, 0x21, 0x00], ESC, 0x45, 0x00), // Reset size & bold
             textBytes(`Ticket ID: ${fNo}\n`),
             textBytes(`Color: ${colorName}\n`),
             textBytes("--------------------------------\n"),
-            new Uint8Array([ESC, 0x61, 0x00]), // Left align
-            textBytes(`Name: ${ticket.name || 'Unknown'}\n`),
-            textBytes(`Date: ${ticket.date || ''}\n`),
-            textBytes(`Time: ${ticket.time || ''}\n`),
-            textBytes(`Type: ${ticket.type || 'Regular'}\n`),
-            textBytes(`Purpose: ${ticket.purpose || ''}\n`)
+            textBytes("Please take your seat and wait\nfor your number to appear\non the screen\n"),
         ];
 
-        if (ticket.comment) {
-            chunks.push(textBytes(`Comment: ${ticket.comment}\n`));
-        }
 
         chunks.push(textBytes("--------------------------------\n"));
         chunks.push(new Uint8Array([ESC, 0x61, 0x01])); // Center align
-        chunks.push(textBytes("Thank you for waiting!\n\n\n\n"));
+        chunks.push(textBytes("Thank you for waiting!\n\n"));
+        chunks.push(textBytes("8<---------------------------->8\n\n"));
+        chunks.push(new Uint8Array([ESC, 0x45, 0x01]));
+        chunks.push(textBytes(`${boxHeader}\n`));
+        chunks.push(new Uint8Array([GS, 0x21, 0x33])); // Huge text for Ticket ID
+        chunks.push(textBytes(`${ticket.id}\n`));
+        chunks.push(new Uint8Array([GS, 0x21, 0x00], ESC, 0x45, 0x00));
+        chunks.push(textBytes(`Ticket ID: ${fNo}\n\n\n\n\n`));
         chunks.push(new Uint8Array([GS, 0x56, 0x41, 0x03])); // Cut paper
 
         const totalLen = chunks.reduce((acc, c) => acc + c.length, 0);

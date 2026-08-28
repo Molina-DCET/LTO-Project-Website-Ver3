@@ -611,23 +611,28 @@ const server = app.listen(PORT, HOST, () => {
     console.log(` Database:   ${dbPath}`);
 
     // Auto-launch Python printer bridge if available
-    const bridgePath = path.join(__dirname, '..', 'printtest', 'printerbridge.py');
+    const bridgePath = path.join(__dirname, 'bit_array', 'printerbridge.py');
     if (fs.existsSync(bridgePath)) {
         try {
-            pyBridgeProcess = spawn('python', [bridgePath], { stdio: 'ignore', detached: false });
-            console.log(` Printer Bridge: Running printerbridge.py on http://127.0.0.1:9100`);
+            pyBridgeProcess = spawn('python', [bridgePath], { stdio: 'inherit', detached: false });
+            console.log(` Printer Bridge: Running bit_array/printerbridge.py on http://127.0.0.1:9100`);
         } catch (e) {
             console.warn(` Printer Bridge Notice: Could not spawn python bridge:`, e.message);
         }
+    } else {
+        console.warn(` Printer Bridge Notice: ${bridgePath} not found.`);
     }
     console.log(`=======================================================`);
 });
 
-process.on('SIGINT', () => {
+const cleanupBridge = () => {
     if (pyBridgeProcess) {
         try { pyBridgeProcess.kill(); } catch (_) {}
     }
     process.exit(0);
-});
+};
+
+process.on('SIGINT', cleanupBridge);
+process.on('SIGTERM', cleanupBridge);
 
 module.exports = { app, server, db };
