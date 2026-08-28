@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>XP-58H ESC/POS Test</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        button {
+            padding: 15px 35px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        #output {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <button onclick="printPOS()">PRINT</button>
+
+    <pre id="output"></pre>
+
+    <script>
+
+        async function printPOS() {
+
+            const ESC = 0x1B;
+            const encoder = new TextEncoder();
+
+            const data = new Uint8Array([
+
+                ESC, 0x40,          // Initialize
+
+                ESC, 0x61, 0x01,    // Center
+
+                ESC, 0x45, 0x01,    // Bold ON
+                ...encoder.encode("HELLO WORLD!\n"),
+                ESC, 0x45, 0x00,    // Bold OFF
+
+                ...encoder.encode("Xprinter XP-58\n"),
+                ...encoder.encode("------------------------\n"),
+
+                ESC, 0x45, 0x01,    // Left
+
+                ...encoder.encode("This is RAW ESC/POS!\n"),
+
+                ESC, 0x45, 0x01,    // Bold ON
+                ...encoder.encode("LTO CABUYAO DISTRICT OFFICE\n"),
+                ESC, 0x45, 0x00,    // Bold OFF
+
+                ESC, 0x45, 0x01,    // Bold ON
+                ...encoder.encode("TICKET\n"),
+                ESC, 0x45, 0x00,    // Bold OFF
+
+                0x0A,
+                0x0A,
+                0x0A
+            ]);
+
+            try {
+
+                const response = await fetch(
+                    "http://127.0.0.1:9100/print",
+                    {
+                        method: "POST",
+                        body: data
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error("Printer bridge returned an error");
+                }
+
+                console.log("ESC/POS sent!");
+
+            } catch (error) {
+
+                console.error(error);
+                alert("Could not connect to printer bridge.");
+
+            }
+        }
+
+    </script>
+
+</body>
+</html>

@@ -69,8 +69,43 @@ console.log(`[Database] SQLite database initialized at ${dbPath}`);
 // 2. MIDDLEWARE & STATIC ASSETS
 // ─────────────────────────────────────────────────────────────────────────────
 app.use(cors());
+app.use('/api/print', express.raw({ type: ['application/octet-stream', 'application/x-www-form-urlencoded', '*/*'], limit: '2mb' }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// RAW ESC/POS Thermal Printer Proxy Endpoint (forwards to printerbridge.py on port 9100)
+app.post('/api/print', (req, res) => {
+    const data = req.body;
+    if (!data || !data.length) {
+        return res.status(400).send('No binary print payload provided');
+    }
+
+    const http = require('http');
+    const proxyReq = http.request({
+        hostname: '127.0.0.1',
+        port: 9100,
+        path: '/print',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/octet-stream',
+            'Content-Length': data.length
+        }
+    }, (proxyRes) => {
+        let body = '';
+        proxyRes.on('data', chunk => body += chunk);
+        proxyRes.on('end', () => {
+            res.status(proxyRes.statusCode).send(body);
+        });
+    });
+
+    proxyReq.on('error', (err) => {
+        console.error('[API Print Proxy Error]:', err.message);
+        res.status(500).send('Printer bridge offline or unreachable: ' + err.message);
+    });
+
+    proxyReq.write(data);
+    proxyReq.end();
+});
 
 // Serve static frontend files from /public
 app.use(express.static(path.join(__dirname, 'public')));
